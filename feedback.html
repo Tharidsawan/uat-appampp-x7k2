@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UAT Feedback</title>
+<style>
+  :root{--blue:#1F4E78;--blue2:#2E6DA4;--bg:#f4f6f9;--line:#d9dee5;--ok:#1e7e34;--err:#9b2226;}
+  *{box-sizing:border-box;font-family:Arial,"Segoe UI",sans-serif;}
+  body{margin:0;background:var(--bg);color:#222;}
+  header{background:var(--blue);color:#fff;padding:16px 22px;}
+  header h1{margin:0;font-size:20px;}
+  header p{margin:4px 0 0;font-size:12px;opacity:.88;}
+  .wrap{max-width:760px;margin:0 auto;padding:18px;}
+  .card{background:#fff;border:1px solid var(--line);border-radius:10px;padding:18px;margin-bottom:18px;}
+  h2{margin:0 0 14px;font-size:15px;color:var(--blue);}
+  label{display:block;font-size:12px;font-weight:bold;margin:10px 0 4px;}
+  input,select,textarea{width:100%;padding:8px 10px;border:1px solid var(--line);border-radius:6px;font-size:13px;}
+  textarea{resize:vertical;min-height:56px;}
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+  .drop{margin-top:6px;border:2px dashed var(--blue2);border-radius:8px;padding:18px;text-align:center;font-size:13px;color:#555;background:#fafcff;cursor:pointer;}
+  .drop.hl{background:#eaf3ff;}
+  .drop b{color:var(--blue);}
+  .thumbs{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;}
+  .thumb{position:relative;width:96px;height:72px;border:1px solid var(--line);border-radius:6px;overflow:hidden;background:#000;}
+  .thumb img{width:100%;height:100%;object-fit:cover;}
+  .thumb b{position:absolute;top:1px;right:3px;color:#fff;background:rgba(200,0,0,.85);width:18px;height:18px;line-height:18px;border-radius:50%;font-size:12px;text-align:center;cursor:pointer;}
+  button{cursor:pointer;border:none;border-radius:6px;font-size:14px;font-weight:bold;padding:11px 18px;}
+  .primary{background:var(--blue);color:#fff;width:100%;}
+  .ghost{background:#eef1f5;color:#333;}
+  .req{color:#c00;}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);padding:12px 20px;border-radius:8px;color:#fff;font-size:14px;font-weight:bold;display:none;z-index:5;box-shadow:0 4px 16px rgba(0,0,0,.2);}
+  .sent{background:var(--ok);} .fail{background:var(--err);}
+  .status{margin-top:14px;}
+  .si{display:flex;align-items:center;gap:8px;font-size:12px;padding:7px 10px;border:1px solid var(--line);border-radius:6px;margin-top:6px;background:#fbfcfd;}
+  .dot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;}
+  .d-sending{background:#b8860b;} .d-sent{background:var(--ok);} .d-fail{background:var(--err);}
+  .si .txt{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .si button{padding:4px 10px;font-size:11px;}
+  .banner{background:#fff3cd;border:1px solid #ffe69c;color:#7a5b00;padding:12px 14px;border-radius:8px;font-size:13px;margin-bottom:16px;line-height:1.5;}
+  .note{font-size:11px;color:#777;margin-top:8px;line-height:1.5;}
+  .lb{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:9;}
+  .lb img{max-width:92%;max-height:92%;}
+</style>
+</head>
+<body>
+<header>
+  <h1>UAT Feedback</h1>
+  <p>เจอปัญหาตอนทดสอบ? พิมพ์สั้นๆ + วางรูปแคป (Ctrl+V) แล้วกดส่ง — ทีมงานรับข้อมูลรวมอัตโนมัติ</p>
+</header>
+
+<div class="wrap">
+  <div id="cfgBanner" class="banner" style="display:none">
+    ⚠ แอปยังไม่ได้เชื่อมต่อปลายทาง — เปิดไฟล์นี้ด้วย Notepad แล้วใส่ลิงก์ Web app ของคุณในบรรทัด <b>WEBAPP_URL</b> (ดูใน Setup_Guide.md)
+  </div>
+
+  <div class="card">
+    <h2>ส่ง Feedback</h2>
+    <div class="row2">
+      <div><label>ชื่อผู้ทดสอบ <span class="req">*</span></label><input id="tester" placeholder="เช่น สมหญิง"></div>
+      <div><label>โมดูล / หน้าจอ</label><input id="module" placeholder="เช่น หน้า Login"></div>
+    </div>
+    <div class="row2">
+      <div><label>Test Case / Ref</label><input id="ref" placeholder="เช่น TC-012"></div>
+      <div><label>ความรุนแรง</label>
+        <select id="severity"><option>Critical</option><option>Major</option><option selected>Minor</option><option>Cosmetic</option></select>
+      </div>
+    </div>
+    <label>สรุปปัญหา / Feedback <span class="req">*</span></label>
+    <textarea id="summary" placeholder="พิมพ์สั้นๆ ว่าเจออะไร"></textarea>
+    <div class="row2">
+      <div><label>คาดหวัง (Expected)</label><textarea id="expected" placeholder="ควรเป็นอย่างไร"></textarea></div>
+      <div><label>เจอจริง (Actual)</label><textarea id="actual" placeholder="เกิดอะไรขึ้น"></textarea></div>
+    </div>
+
+    <label>รูปแคปหน้าจอ</label>
+    <div class="drop" id="drop" tabindex="0">
+      📋 กด <b>Ctrl+V</b> เพื่อวางรูปที่แคปไว้ได้เลย<br><span style="font-size:11px;color:#888">(หรือลากไฟล์มาวาง / คลิกเพื่อเลือกไฟล์ — ไม่ต้องเซฟรูปก่อน)</span>
+      <input type="file" id="file" accept="image/*" multiple hidden>
+    </div>
+    <div class="thumbs" id="thumbs"></div>
+
+    <div style="margin-top:18px;"><button class="primary" id="send">ส่ง Feedback</button></div>
+    <div class="note">รูปจะถูกย่อขนาดอัตโนมัติเพื่อส่งเร็วขึ้น และอัปโหลดเข้าระบบให้เอง — คุณไม่ต้องบันทึกไฟล์รูป</div>
+
+    <div class="status" id="statusList"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<div class="lb" id="lb"><img id="lbimg"></div>
+
+<script>
+/* ============================================================
+   ตั้งค่า: วางลิงก์ Web app ที่ได้จากการ Deploy Apps Script
+   (ลงท้ายด้วย /exec)  ดูขั้นตอนใน Setup_Guide.md
+   ============================================================ */
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzE78R-meSnmjfwkX8OfkZlB-oP9Hh1l_G1HXvXY8NtPGoM23wPeYV461lCttwuCOYmOg/exec";   // <<<<<<  ใส่ลิงก์ตรงนี้  เช่น "https://script.google.com/macros/s/XXXX/exec"
+
+const $=id=>document.getElementById(id);
+let pending=[];          // รูปของฟอร์มปัจจุบัน (dataURL ที่ย่อแล้ว)
+let queue=[];            // รายการที่ส่ง พร้อมสถานะ
+
+if(!WEBAPP_URL) $('cfgBanner').style.display='block';
+
+/* ---------- รับรูป + ย่อขนาด ---------- */
+function downscale(dataUrl, cb){
+  const img=new Image();
+  img.onload=()=>{
+    const max=1600;
+    let {width:w,height:h}=img;
+    if(w>max||h>max){const s=Math.min(max/w,max/h);w=Math.round(w*s);h=Math.round(h*s);}
+    const c=document.createElement('canvas');c.width=w;c.height=h;
+    c.getContext('2d').drawImage(img,0,0,w,h);
+    cb(c.toDataURL('image/jpeg',0.92));
+  };
+  img.onerror=()=>cb(dataUrl);
+  img.src=dataUrl;
+}
+function fileToData(f){const r=new FileReader();r.onload=e=>downscale(e.target.result,d=>{pending.push(d);drawThumbs();});r.readAsDataURL(f);}
+function drawThumbs(){
+  $('thumbs').innerHTML=pending.map((d,i)=>`<div class="thumb"><img src="${d}" data-v="${i}"><b data-i="${i}">×</b></div>`).join('');
+  $('thumbs').querySelectorAll('b').forEach(b=>b.onclick=()=>{pending.splice(+b.dataset.i,1);drawThumbs();});
+  $('thumbs').querySelectorAll('img').forEach(im=>im.onclick=()=>{$('lbimg').src=im.src;$('lb').style.display='flex';});
+}
+const drop=$('drop');
+drop.addEventListener('click',()=>$('file').click());
+$('file').addEventListener('change',e=>{[...e.target.files].forEach(fileToData);e.target.value='';});
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('hl');});
+drop.addEventListener('dragleave',()=>drop.classList.remove('hl'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('hl');[...e.dataTransfer.files].filter(f=>f.type.startsWith('image')).forEach(fileToData);});
+window.addEventListener('paste',e=>{for(const it of e.clipboardData.items){if(it.type.startsWith('image'))fileToData(it.getAsFile());}});
+$('lb').onclick=()=>$('lb').style.display='none';
+
+/* ---------- ส่ง ---------- */
+function uuid(){return (crypto.randomUUID&&crypto.randomUUID())||('id-'+Date.now()+'-'+Math.random().toString(16).slice(2));}
+$('send').onclick=()=>{
+  if(!WEBAPP_URL){toast('ยังไม่ได้ตั้งค่า WEBAPP_URL','fail');return;}
+  if(!$('tester').value.trim()||!$('summary').value.trim()){toast('กรอกชื่อผู้ทดสอบ และสรุปปัญหา','fail');return;}
+  const rec={uuid:uuid(),tester:$('tester').value.trim(),module:$('module').value.trim(),
+    ref:$('ref').value.trim(),severity:$('severity').value,summary:$('summary').value.trim(),
+    expected:$('expected').value.trim(),actual:$('actual').value.trim(),images:pending.slice()};
+  const item={rec,label:rec.summary.slice(0,40)||'(feedback)',state:'sending'};
+  queue.unshift(item);
+  pending=[];drawThumbs();['module','ref','summary','expected','actual'].forEach(i=>$(i).value='');
+  renderStatus();
+  doSend(item);
+};
+async function doSend(item){
+  item.state='sending';item.err='';renderStatus();
+  try{
+    // ส่งแบบอ่าน response ได้ (body text/plain = simple request ไม่ติด preflight)
+    const r=await fetch(WEBAPP_URL,{method:'POST',body:JSON.stringify(item.rec),redirect:'follow'});
+    const t=await r.text();
+    let j={};try{j=JSON.parse(t);}catch(e){}
+    if(j.ok){item.state='sent';renderStatus();toast('ส่ง Feedback เรียบร้อย ✓','sent');return;}
+    item.state='fail';item.err=j.error||('HTTP '+r.status+' — '+t.slice(0,140));
+    renderStatus();toast('ส่งไม่สำเร็จ','fail');
+  }catch(e){
+    // อ่าน response ไม่ได้ (มักเป็น CORS) — ข้อมูลน่าจะถึงปลายทางแล้ว ลองยิงซ้ำแบบ no-cors (เซิร์ฟเวอร์กันซ้ำด้วย UUID)
+    try{
+      await fetch(WEBAPP_URL,{method:'POST',mode:'no-cors',body:JSON.stringify(item.rec)});
+      item.state='sent';renderStatus();toast('ส่งแล้ว (โปรดตรวจใน Sheet)','sent');
+    }catch(e2){
+      item.state='fail';item.err='เครือข่าย: '+String(e2&&e2.message||e2);
+      renderStatus();toast('ส่งไม่สำเร็จ','fail');
+    }
+  }
+}
+function renderStatus(){
+  if(!queue.length){$('statusList').innerHTML='';return;}
+  $('statusList').innerHTML='<div style="font-size:12px;font-weight:bold;color:#555;margin-top:6px">รายการที่ส่งจากเครื่องนี้</div>'+
+    queue.map((q,i)=>`<div class="si"><span class="dot d-${q.state}"></span>
+      <span class="txt">${esc(q.label)}</span>
+      <span style="font-size:11px;color:#888">${ {sending:'กำลังส่ง…',sent:'ส่งแล้ว',fail:'ล้มเหลว'}[q.state] }</span>
+      ${q.state==='fail'?`<button class="ghost" data-r="${i}">ลองใหม่</button>`:''}</div>${q.state==='fail'&&q.err?`<div style="font-size:11px;color:#9b2226;padding:2px 10px 4px">${esc(q.err)}</div>`:''}`).join('');
+  $('statusList').querySelectorAll('button[data-r]').forEach(b=>b.onclick=()=>doSend(queue[+b.dataset.r]));
+}
+function esc(s){return(s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+let tT;
+function toast(msg,kind){const t=$('toast');t.textContent=msg;t.className='toast '+kind;t.style.display='block';clearTimeout(tT);tT=setTimeout(()=>t.style.display='none',2600);}
+</script>
+</body>
+</html>

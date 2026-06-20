@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UAT Report</title>
+<style>
+  *{box-sizing:border-box;font-family:Arial,"Segoe UI","Sarabun",sans-serif;}
+  body{margin:0;background:#f4f6f9;color:#222;}
+  header{background:#1F4E78;color:#fff;padding:16px 22px;}
+  header h1{margin:0;font-size:20px;} header p{margin:4px 0 0;font-size:12px;opacity:.88;}
+  .wrap{max-width:960px;margin:0 auto;padding:18px;}
+  .toolbar{background:#fff;border:1px solid #d9dee5;border-radius:10px;padding:14px 16px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;margin-bottom:16px;}
+  .toolbar label{display:block;font-size:11px;font-weight:bold;color:#555;margin-bottom:4px;}
+  select,input[type=date]{padding:8px 10px;border:1px solid #d9dee5;border-radius:6px;font-size:13px;}
+  button{cursor:pointer;border:none;border-radius:6px;font-size:13px;font-weight:bold;padding:9px 16px;background:#1F4E78;color:#fff;}
+  button.ghost{background:#eef1f5;color:#333;}
+  button.toggle{background:#eef1f5;color:#333;} button.toggle.on{background:#0d6efd;color:#fff;}
+  .spacer{flex:1;}
+  /* multi-select */
+  .ms{position:relative;}
+  .ms-btn{background:#fff;border:1px solid #d9dee5;color:#333;font-weight:normal;min-width:130px;text-align:left;}
+  .ms-panel{display:none;position:absolute;z-index:30;background:#fff;border:1px solid #ccc;border-radius:6px;padding:6px;min-width:170px;max-height:260px;overflow:auto;box-shadow:0 6px 16px rgba(0,0,0,.16);}
+  .ms-panel.open{display:block;}
+  .ms-opt{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 6px;font-weight:normal;color:#333;white-space:nowrap;border-radius:4px;cursor:pointer;}
+  .ms-opt:hover{background:#f0f4f9;}
+  .ms-empty{font-size:12px;color:#999;padding:4px;}
+  .summary{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;}
+  .pill{background:#fff;border:1px solid #d9dee5;border-radius:8px;padding:8px 14px;font-size:13px;}
+  .pill b{color:#1F4E78;font-size:16px;margin-right:4px;}
+  .item{background:#fff;border:1px solid #d9dee5;border-radius:10px;padding:16px 18px;margin-bottom:14px;}
+  .item h3{margin:0 0 8px;font-size:15px;color:#1F4E78;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .meta{font-size:12px;color:#555;margin-bottom:8px;} .meta span{margin-right:14px;}
+  .kv{font-size:13px;margin:3px 0;} .kv b{color:#444;}
+  .tag{display:inline-block;padding:1px 9px;border-radius:10px;font-size:11px;font-weight:bold;}
+  .sev-Critical{background:#f8d7da;color:#842029;}.sev-Major{background:#ffe5cc;color:#8a4b00;}
+  .sev-Minor{background:#fff3cd;color:#7a5b00;}.sev-Cosmetic{background:#e2e3e5;color:#41464b;}
+  .tag.res-Pass{background:#d1e7dd;color:#0f5132;}.tag.res-Fail{background:#f8d7da;color:#842029;}.tag.res-Cancel{background:#e2e3e5;color:#41464b;}
+  .tag.ty{background:#e7d9f7;color:#5a2a82;}
+  .tag.fx-Fixed{background:#d1e7dd;color:#0f5132;}.tag.fx-NS{background:#fde2cf;color:#8a4b00;}
+  .tag.nc{background:#fff3cd;color:#7a5b00;}
+  .imgs{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;}
+  .imgs a{display:block;border:1px solid #d9dee5;border-radius:6px;overflow:hidden;flex:1 1 420px;max-width:640px;}
+  .imgs img{display:block;width:100%;max-width:640px;height:auto;background:#000;}
+  .imgs .miss{padding:18px;font-size:12px;color:#999;max-width:420px;}
+  .ctrls{margin-top:12px;padding-top:12px;border-top:1px dashed #e0e0e0;}
+  .ctrl{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:8px;}
+  .ctrl .lbl{font-size:12px;font-weight:bold;color:#555;min-width:90px;}
+  .rbtn{padding:5px 13px;border:1px solid #c9d2dc;background:#fff;color:#333;border-radius:20px;font-size:12px;font-weight:bold;}
+  .rbtn.sel.Pass{background:#198754;color:#fff;border-color:#198754;}
+  .rbtn.sel.Fail{background:#dc3545;color:#fff;border-color:#dc3545;}
+  .rbtn.sel.Cancel{background:#6c757d;color:#fff;border-color:#6c757d;}
+  .rbtn.sel.ty-Bug{background:#dc3545;color:#fff;border-color:#dc3545;}
+  .rbtn.sel.ty-Req{background:#6f42c1;color:#fff;border-color:#6f42c1;}
+  .rbtn.sel.ty-Ful{background:#198754;color:#fff;border-color:#198754;}
+  .rbtn.sel.fx-Fixed{background:#198754;color:#fff;border-color:#198754;}
+  .rbtn.sel.fx-NS{background:#fd7e14;color:#fff;border-color:#fd7e14;}
+  .rbtn.sel.Yes{background:#fd7e14;color:#fff;border-color:#fd7e14;}
+  .rbtn.sel.No{background:#6c757d;color:#fff;border-color:#6c757d;}
+  .reso-input{flex:1;min-width:240px;padding:7px 10px;border:1px solid #d9dee5;border-radius:6px;font-size:13px;}
+  .save{padding:5px 16px;background:#1F4E78;color:#fff;border-radius:6px;font-size:12px;}
+  .save:disabled{opacity:.5;}
+  .savemsg{font-size:12px;} .savemsg.ok{color:#198754;} .savemsg.err{color:#dc3545;}
+  .status{font-size:14px;color:#555;padding:30px;text-align:center;line-height:1.6;} .err{color:#9b2226;}
+  .mt{font-size:11px;color:#888;font-style:italic;}
+  @media print{
+    body{background:#fff;} header{background:#1F4E78 !important;-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+    .toolbar,.ctrls{display:none;} .item{break-inside:avoid;border-color:#bbb;}
+    .tag,[class*="sev-"],[class*="res-"],[class*="fx-"],.tag.ty,.tag.nc{-webkit-print-color-adjust:exact;print-color-adjust:exact;}
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">UAT Feedback Report</h1>
+  <p id="sub">กำลังโหลดข้อมูลจาก Google Sheet…</p>
+</header>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div><label>วันที่ / Date</label><select id="fDate"><option value="">ทั้งหมด</option></select></div>
+    <div id="filters" style="display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end;"></div>
+    <div><label>ภาษา</label><button class="toggle" id="enToggle">🌐 English (for Dev)</button></div>
+    <div class="spacer"></div>
+    <button class="ghost" id="clearF">ล้างฟิลเตอร์</button>
+    <button class="ghost" id="reload">รีโหลด</button>
+    <button id="print">พิมพ์ / Save PDF</button>
+  </div>
+
+  <div class="summary" id="summary"></div>
+  <div id="list"><div class="status">⏳ กำลังโหลด…</div></div>
+</div>
+
+<script>
+/* ============ ตั้งค่า ============ */
+const SHEET_ID  = "1k9CKC6NnJ-0Ucwksi2L-3oaLCTnQ1Qv_FAuwSjXCPrA";
+const GID       = "0";
+
+const WEBAPP_URL = "https://script.google.com/macros/s/AKfycbzE78R-meSnmjfwkX8OfkZlB-oP9Hh1l_G1HXvXY8NtPGoM23wPeYV461lCttwuCOYmOg/exec";
+/* ================================ */
+
+const $=id=>document.getElementById(id);
+let records=[], timer=null, enMode=false;
+const tcache={};
+
+/* ปุ่มแก้ค่า (กลุ่มปุ่ม) */
+const RESULTS=[['Pass','Pass'],['Fail','Fail'],['Cancel','Cancel']];
+const TYPES  =[['Bug','Bug'],['Requirement','Req'],['Fulfillment','Ful']];
+const FIXES  =[['Fixed','Fixed'],['Not Started','NS']];
+const NEEDS  =[['Yes','Yes'],['No','No']];
+
+/* ฟิลเตอร์ multi-select : key ตรงกับชื่อ field ใน record */
+const FILTERS=[
+  {key:'severity',label:'Severity',     base:['Critical','Major','Minor','Cosmetic']},
+  {key:'result',  label:'Test result',  base:['Pass','Fail','Cancel']},
+  {key:'type',    label:'Issue Type',   base:['Bug','Requirement','Fulfillment']},
+  {key:'fix',     label:'Fix Status',   base:['Fixed','Not Started']},
+  {key:'need',    label:'Need Clarif.', base:[]}
+];
+const selected={severity:new Set(),result:new Set(),type:new Set(),fix:new Set(),need:new Set()};
+
+function pad(n){return ('0'+n).slice(-2);}
+function fileId(u){const m=String(u).match(/[-\w]{25,}/);return m?m[0]:null;}
+function imgSrc(id){return "https://drive.google.com/thumbnail?id="+id+"&sz=w1600";}
+function ymdFromCell(c){
+  if(!c) return '';
+  if(c.f){const m=c.f.match(/(\d+)\/(\d+)\/(\d+)/);if(m)return m[3]+'-'+pad(m[1])+'-'+pad(m[2]);return String(c.f).slice(0,10);}
+  if(typeof c.v==='string'){const m=c.v.match(/Date\((\d+),(\d+),(\d+)/);if(m)return m[1]+'-'+pad(+m[2]+1)+'-'+pad(m[3]);}
+  return '';
+}
+const cv=(row,j)=>(row.c&&row.c[j]&&row.c[j].v!=null)?row.c[j].v:'';
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
+
+/* ---------- โหลดข้อมูล (gviz JSONP) ----------
+   คอลัมน์: 0 Timestamp,1 IssueID,2 UUID,3 Tester,4 Module,5 Ref,6 Severity,7 Summary,
+   8 Expected,9 Actual,10 Images,11 Need Clarification(L),12 Issue Type(M),
+   13 Resolution/Comment(N),14 Fix Status(O),15 Test result(P) */
+function load(){
+  $('list').innerHTML='<div class="status">⏳ กำลังโหลด…</div>';
+  $('sub').textContent='กำลังโหลดข้อมูลจาก Google Sheet…';
+  const cbName='__uatcb_'+Date.now();
+  const old=document.getElementById('gvizScript'); if(old) old.remove();
+  clearTimeout(timer);
+  timer=setTimeout(()=>failMsg('โหลดข้อมูลไม่สำเร็จ (หมดเวลา) — ตรวจอินเทอร์เน็ต และการแชร์ชีตเป็น “Anyone with the link – Viewer”'),12000);
+  window[cbName]=function(resp){
+    clearTimeout(timer);
+    try{
+      if(!resp||!resp.table){failMsg('รูปแบบข้อมูลไม่ถูกต้อง');return;}
+      records=(resp.table.rows||[]).map(row=>({
+        date:ymdFromCell(row.c&&row.c[0]), id:cv(row,1), uuid:cv(row,2), tester:cv(row,3),
+        module:cv(row,4), ref:cv(row,5), severity:cv(row,6), summary:cv(row,7),
+        expected:cv(row,8), actual:cv(row,9),
+        images:String(cv(row,10)).split('\n').map(s=>s.trim()).filter(Boolean),
+        need:String(cv(row,11)).trim(), type:String(cv(row,12)).trim(),
+        resolution:String(cv(row,13)).trim(), fix:String(cv(row,14)).trim(),
+        result:String(cv(row,15)).trim()
+      })).filter(r=>r.id||r.summary);
+      const dates=[...new Set(records.map(r=>r.date).filter(Boolean))].sort().reverse();
+      $('fDate').innerHTML='<option value="">ทั้งหมด</option>'+dates.map(d=>`<option value="${d}">${d}</option>`).join('');
+      buildFilters();
+      $('sub').textContent='อัปเดต '+new Date().toLocaleString('th-TH')+' · ทั้งหมด '+records.length+' รายการ';
+      render();
+    }catch(e){failMsg('ประมวลผลข้อมูลผิดพลาด: '+e.message);}
+    delete window[cbName];
+  };
+  const s=document.createElement('script'); s.id='gvizScript';
+  s.src='https://docs.google.com/spreadsheets/d/'+SHEET_ID+'/gviz/tq?gid='+GID+'&tqx=responseHandler:'+cbName;
+  s.onerror=()=>{clearTimeout(timer);failMsg('โหลดสคริปต์ข้อมูลไม่ได้ — ตรวจอินเทอร์เน็ต และการแชร์ชีต');};
+  document.body.appendChild(s);
+}
+function failMsg(m){$('list').innerHTML='<div class="status err">'+m+'</div>';$('sub').textContent='โหลดข้อมูลไม่สำเร็จ';}
+
+/* ---------- ฟิลเตอร์ multi-select (dropdown ติ๊กได้หลายช่อง) ---------- */
+function buildFilters(){
+  const host=$('filters'); host.innerHTML='';
+  FILTERS.forEach(f=>{
+    let vals=[...f.base];
+    records.forEach(r=>{const v=r[f.key]; if(v&&vals.indexOf(v)<0) vals.push(v);});
+    const wrap=document.createElement('div'); wrap.className='ms';
+    wrap.innerHTML=`<label>${f.label}</label>
+      <button type="button" class="ms-btn" data-k="${f.key}">ทั้งหมด ▾</button>
+      <div class="ms-panel">${vals.length?vals.map(v=>`<label class="ms-opt"><input type="checkbox" value="${esc(v)}"> ${esc(v)}</label>`).join(''):'<div class="ms-empty">— ไม่มีค่า —</div>'}</div>`;
+    host.appendChild(wrap);
+    const btn=wrap.querySelector('.ms-btn'), panel=wrap.querySelector('.ms-panel');
+    btn.onclick=(e)=>{e.stopPropagation();const wasOpen=panel.classList.contains('open');document.querySelectorAll('.ms-panel.open').forEach(p=>p.classList.remove('open'));if(!wasOpen)panel.classList.add('open');};
+    panel.addEventListener('click',e=>e.stopPropagation());
+    panel.querySelectorAll('input').forEach(cb=>cb.onchange=()=>{
+      const set=selected[f.key]; cb.checked?set.add(cb.value):set.delete(cb.value);
+      btn.textContent=(set.size?f.label+' ('+set.size+')':'ทั้งหมด')+' ▾';
+      render();
+    });
+  });
+}
+document.addEventListener('click',()=>document.querySelectorAll('.ms-panel.open').forEach(p=>p.classList.remove('open')));
+
+/* ---------- แปลภาษา (MyMemory free API) ---------- */
+async function tr(text){
+  const t=String(text||'').trim(); if(!t) return '';
+  if(tcache[t]!=null) return tcache[t];
+  try{const r=await fetch('https://api.mymemory.translated.net/get?q='+encodeURIComponent(t)+'&langpair=th|en');
+    const j=await r.json(); const out=(j&&j.responseData&&j.responseData.translatedText)||t; tcache[t]=out; return out;
+  }catch(e){tcache[t]=t;return t;}
+}
+async function translateVisible(rows){for(const r of rows){await Promise.all([tr(r.summary),tr(r.expected),tr(r.actual),tr(r.module),tr(r.resolution)]);}}
+
+/* ---------- แสดงผล ---------- */
+function getFiltered(){
+  const fd=$('fDate').value;
+  return records.filter(r=>{
+    if(fd && r.date!==fd) return false;
+    for(const f of FILTERS){const set=selected[f.key]; if(set.size && !set.has(String(r[f.key]||''))) return false;}
+    return true;
+  });
+}
+function tagsHTML(r){
+  let h='<span class="tag sev-'+r.severity+'">'+esc(r.severity)+'</span>';
+  if(r.result) h+=' <span class="tag res-'+r.result+'">'+esc(r.result)+'</span>';
+  if(r.type)   h+=' <span class="tag ty">'+esc(r.type)+'</span>';
+  if(r.fix)    h+=' <span class="tag '+(r.fix==='Fixed'?'fx-Fixed':'fx-NS')+'">'+esc(r.fix)+'</span>';
+  if(r.need && !/^(no|false|0|-)$/i.test(r.need)) h+=' <span class="tag nc">Need Clarification</span>';
+  return h;
+}
+async function render(){
+  const rows=getFiltered();
+  const cnt=s=>rows.filter(r=>r.severity===s).length;
+  $('summary').innerHTML=`<div class="pill"><b>${rows.length}</b>${enMode?'items':'รายการ'}</div>`+
+    ['Critical','Major','Minor','Cosmetic'].map(s=>`<div class="pill"><span class="tag sev-${s}">${s}</span> <b style="font-size:14px">${cnt(s)}</b></div>`).join('');
+  $('title').textContent = enMode ? 'UAT Feedback Report (for Developer)' : 'UAT Feedback Report';
+  if(!rows.length){$('list').innerHTML='<div class="status">'+(enMode?'No items':'ไม่มีรายการตามเงื่อนไข')+'</div>';return;}
+  if(enMode){$('list').innerHTML='<div class="status">🌐 กำลังแปลเป็นภาษาอังกฤษ…</div>';await translateVisible(rows);}
+  const L = enMode ? {sum:'Issue',exp:'Expected',act:'Actual',res:'Test result',ty:'Issue Type',reso:'Resolution / Comment'}
+                   : {sum:'สรุป',exp:'คาดหวัง',act:'เจอจริง',res:'ผลทดสอบ',ty:'ประเภท',reso:'Resolution / Comment'};
+  const T = enMode ? (s=>tcache[String(s||'').trim()]||s) : (s=>s);
+
+  $('list').innerHTML=rows.map(r=>{
+    const key=esc(r.id||r.uuid);
+    const grp=(action,field,opts,label)=>`<div class="ctrl" data-action="${action}" data-field="${field}">
+        <span class="lbl">${label}:</span>
+        ${opts.map(([val,cls])=>`<button class="rbtn ${cls} ${r[field]===val?'sel':''}" data-set="${esc(val)}">${esc(val)}</button>`).join('')}
+        <button class="save" data-save="1">${enMode?'Save':'บันทึก'}</button><span class="savemsg"></span></div>`;
+    return `
+    <div class="item" data-key="${key}">
+      <h3>${esc(r.id)} ${tagsHTML(r)}</h3>
+      <div class="meta"><span>📅 ${esc(r.date)}</span><span>👤 ${esc(r.tester)||'-'}</span>
+        <span>🧩 ${esc(T(r.module))||'-'}</span><span>🔖 ${esc(r.ref)||'-'}</span></div>
+      <div class="kv"><b>${L.sum}:</b> ${esc(T(r.summary))||'-'}</div>
+      ${r.expected?`<div class="kv"><b>${L.exp}:</b> ${esc(T(r.expected))}</div>`:''}
+      ${r.actual?`<div class="kv"><b>${L.act}:</b> ${esc(T(r.actual))}</div>`:''}
+      ${enMode&&(r.summary||r.expected||r.actual)?`<div class="mt">— machine translated; original in Thai —</div>`:''}
+      ${r.images.length?`<div class="imgs">${r.images.map(u=>{const id=fileId(u);return id?`<a href="${esc(u)}" target="_blank"><img src="${imgSrc(id)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.parentNode.outerHTML='<div class=&quot;miss&quot;>โหลดรูปไม่ได้ — <a href=&quot;${esc(u)}&quot; target=_blank>open image</a></div>'"></a>`:'';}).join('')}</div>`:''}
+      ${r.resolution?`<div class="kv"><b>${L.reso}:</b> ${esc(T(r.resolution))}</div>`:''}
+      <div class="ctrls">
+        ${grp('setResult','result',RESULTS,L.res)}
+      </div>
+    </div>`;
+  }).join('');
+  bindControls();
+}
+
+/* ---------- ปุ่มแก้ค่า + Save (ทุกกลุ่ม) ---------- */
+function bindControls(){
+  document.querySelectorAll('.item').forEach(card=>{
+    const key=card.getAttribute('data-key');
+    const rec=records.find(r=>(r.id||r.uuid)===key);
+    card.querySelectorAll('.ctrl').forEach(grp=>{
+      const action=grp.getAttribute('data-action'), field=grp.getAttribute('data-field');
+      const input=grp.querySelector('.reso-input');
+      let chosen=rec?rec[field]:'';
+      grp.querySelectorAll('.rbtn').forEach(b=>b.onclick=()=>{
+        chosen=b.getAttribute('data-set');
+        grp.querySelectorAll('.rbtn').forEach(x=>x.classList.remove('sel')); b.classList.add('sel');
+      });
+      grp.querySelector('[data-save]').onclick=async(e)=>{
+        const btn=e.target,msg=grp.querySelector('.savemsg');
+        const value = input ? input.value : chosen;
+        if(!WEBAPP_URL){msg.className='savemsg err';msg.textContent=' ยังไม่ได้ตั้ง WEBAPP_URL';return;}
+        if(!input && !value){msg.className='savemsg err';msg.textContent=' เลือกค่าก่อน';return;}
+        btn.disabled=true;msg.className='savemsg';msg.textContent=' กำลังบันทึก…';
+        const res=await saveField(action,rec,value);
+        btn.disabled=false;
+        if(res.ok){rec[field]=value;msg.className='savemsg ok';msg.textContent=' ✓ บันทึกแล้ว';
+          card.querySelector('h3').innerHTML=esc(rec.id)+' '+tagsHTML(rec);}
+        else{msg.className='savemsg err';msg.textContent=' ไม่สำเร็จ: '+(res.error||'ไม่ทราบสาเหตุ');}
+      };
+    });
+  });
+}
+/* บันทึกผ่าน JSONP — อ่านผลจริงจากเซิร์ฟเวอร์ */
+function saveField(action,rec,value){
+  return new Promise(resolve=>{
+    if(!WEBAPP_URL){resolve({ok:false,error:'ยังไม่ได้ตั้ง WEBAPP_URL'});return;}
+    const cb='__save_'+Date.now()+'_'+Math.floor(Math.random()*1e4);
+    const t=setTimeout(()=>{resolve({ok:false,error:'หมดเวลา/เครือข่าย'});cleanup();},15000);
+    function cleanup(){clearTimeout(t);delete window[cb];const el=document.getElementById(cb);if(el)el.remove();}
+    window[cb]=function(res){resolve(res||{ok:false,error:'no response'});cleanup();};
+    const s=document.createElement('script');s.id=cb;
+    s.src=WEBAPP_URL+'?action='+action+'&callback='+cb+
+          '&id='+encodeURIComponent(rec.id||'')+'&uuid='+encodeURIComponent(rec.uuid||'')+
+          '&value='+encodeURIComponent(value);
+    s.onerror=()=>{resolve({ok:false,error:'โหลดสคริปต์ไม่ได้'});cleanup();};
+    document.body.appendChild(s);
+  });
+}
+
+$('reload').onclick=load;
+$('print').onclick=()=>window.print();
+$('fDate').onchange=render;
+$('clearF').onclick=()=>{Object.values(selected).forEach(s=>s.clear());$('fDate').value='';buildFilters();render();};
+$('enToggle').onclick=()=>{enMode=!enMode;$('enToggle').classList.toggle('on',enMode);
+  $('enToggle').textContent=enMode?'🇹🇭 ไทย':'🌐 English (for Dev)';render();};
+load();
+</script>
+</body>
+</html>
