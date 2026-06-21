@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>MPP — UAT Core Scenarios</title>
+<style>
+  :root {
+    --ink-900: #111827;
+    --ink-800: #1f2937;
+    --ink-700: #374151;
+    --ink-600: #4b5563;
+    --ink-500: #6b7280;
+    --ink-400: #9ca3af;
+    --ink-300: #d1d5db;
+    --ink-200: #e5e7eb;
+    --ink-100: #f3f4f6;
+    --ink-50:  #f9fafb;
+    --paper:   #ffffff;
+    --line:    #e5e7eb;
+    --pttep:   #c8102e;
+    --info:    #1d4ed8;
+    --warn:    #b45309;
+    --ok:      #047857;
+    --shadow:  none;
+    --radius:  6px;
+    --mono:    ui-monospace, SFMono-Regular, Menlo, monospace;
+    --sans:    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--ink-50);
+    color: var(--ink-900);
+    font-family: var(--sans);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+  .page {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 40px 48px 80px;
+    background: var(--paper);
+    min-height: 100vh;
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+  header.cover {
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 28px;
+    margin-bottom: 32px;
+  }
+  .logo-row {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+  }
+  .logo-row img {
+    width: 72px; height: auto; display: block;
+  }
+  .logo-row .brand {
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-700);
+  }
+  .logo-row .brand small {
+    display: block;
+    font-weight: 400;
+    font-size: 11px;
+    color: var(--ink-500);
+    letter-spacing: 0.04em;
+  }
+  h1 {
+    margin: 24px 0 6px;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--ink-900);
+  }
+  .subtitle {
+    color: var(--ink-600);
+    font-size: 15px;
+    margin: 0 0 16px;
+  }
+  .meta {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    column-gap: 16px;
+    row-gap: 4px;
+    font-size: 13px;
+    color: var(--ink-700);
+    margin-top: 18px;
+  }
+  .meta dt { color: var(--ink-500); }
+  .meta dd { margin: 0; }
+  h2 {
+    margin: 40px 0 4px;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--ink-900);
+    letter-spacing: -0.005em;
+  }
+  h2 .ord {
+    font-family: var(--mono);
+    color: var(--ink-400);
+    font-weight: 400;
+    margin-right: 10px;
+    font-size: 14px;
+  }
+  h2 + .group-note {
+    color: var(--ink-500);
+    margin: 0 0 14px;
+    font-size: 13px;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 8px;
+    font-size: 13px;
+  }
+  thead th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--ink-700);
+    background: var(--ink-50);
+    border-top: 1px solid var(--line);
+    border-bottom: 1px solid var(--line);
+    padding: 8px 10px;
+    font-size: 12px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+  tbody td {
+    border-bottom: 1px solid var(--line);
+    padding: 10px;
+    vertical-align: top;
+    color: var(--ink-800);
+  }
+  tbody tr:hover { background: var(--ink-50); }
+  td.id {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--ink-600);
+    white-space: nowrap;
+    width: 70px;
+  }
+  td.title { font-weight: 500; }
+  td.role { width: 180px; }
+  td.priority { width: 90px; }
+  td.result {
+    width: 110px;
+    text-align: center;
+  }
+  td.result .box {
+    display: inline-block;
+    border: 1px solid var(--ink-300);
+    border-radius: 3px;
+    width: 84px;
+    height: 22px;
+    line-height: 20px;
+    text-align: center;
+    font-size: 11px;
+    color: var(--ink-500);
+    background: var(--paper);
+  }
+  .tag {
+    display: inline-block;
+    font-size: 11px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    font-weight: 500;
+    border: 1px solid;
+    background: var(--paper);
+    line-height: 1.4;
+  }
+  .tag.role  { color: var(--ink-700); border-color: var(--ink-300); }
+  .tag.p-must  { color: var(--pttep); border-color: var(--pttep); }
+  .tag.p-should { color: var(--warn);  border-color: #fcd34d; }
+  .tag.p-could { color: var(--info);   border-color: #93c5fd; }
+  .steps {
+    margin: 6px 0 0 0;
+    padding: 0;
+    color: var(--ink-600);
+    font-size: 12.5px;
+    list-style: none;
+    counter-reset: step;
+  }
+  .steps li {
+    padding-left: 22px;
+    position: relative;
+    counter-increment: step;
+    margin: 2px 0;
+  }
+  .steps li::before {
+    content: counter(step) ".";
+    position: absolute; left: 0; top: 0;
+    color: var(--ink-400);
+    font-family: var(--mono);
+    font-size: 11px;
+  }
+  .expected {
+    margin-top: 6px;
+    color: var(--ink-700);
+    font-size: 12.5px;
+  }
+  .expected b {
+    color: var(--ink-900);
+    font-weight: 600;
+  }
+  .legend {
+    margin-top: 28px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    font-size: 12.5px;
+    color: var(--ink-600);
+    padding-top: 16px;
+    border-top: 1px solid var(--line);
+  }
+  .legend strong { color: var(--ink-800); }
+  .signoff {
+    margin-top: 48px;
+    border-top: 1px solid var(--line);
+    padding-top: 28px;
+  }
+  .signoff h2 { margin-top: 0; }
+  .sign-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 32px 48px;
+    margin-top: 18px;
+  }
+  .sign-cell label {
+    display: block;
+    font-size: 12px;
+    color: var(--ink-500);
+    margin-bottom: 6px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .sign-cell .line {
+    height: 32px;
+    border-bottom: 1px solid var(--ink-400);
+  }
+  footer.foot {
+    margin-top: 56px;
+    color: var(--ink-500);
+    font-size: 11.5px;
+    text-align: center;
+    border-top: 1px solid var(--line);
+    padding-top: 16px;
+  }
+  @media print {
+    .page { border: 0; padding: 24px 0; max-width: none; }
+    tbody tr:hover { background: transparent; }
+    h2 { break-after: avoid; }
+    table { break-inside: auto; }
+    tr  { break-inside: avoid; }
+  }
+</style>
+
+<style id="uat-mark-style">
+  .uat-toolbar{position:sticky;top:0;z-index:50;background:var(--paper);border:1px solid var(--line);
+    border-radius:var(--radius);padding:12px 16px;margin:0 0 26px;display:flex;flex-wrap:wrap;
+    gap:14px 22px;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.07);}
+  .uat-toolbar .field{display:flex;flex-direction:column;gap:2px;}
+  .uat-toolbar label{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--ink-500);}
+  .uat-toolbar input{font-family:var(--sans);font-size:13px;padding:4px 8px;border:1px solid var(--ink-300);
+    border-radius:4px;color:var(--ink-900);}
+  .uat-summary{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-left:auto;}
+  .chip{font-size:12px;padding:3px 9px;border-radius:999px;border:1px solid var(--ink-300);
+    color:var(--ink-700);background:var(--paper);font-weight:600;white-space:nowrap;}
+  .chip.pass{color:var(--ok);border-color:var(--ok);}
+  .chip.fail{color:var(--pttep);border-color:var(--pttep);}
+  .chip.block{color:var(--warn);border-color:#fcd34d;}
+  .chip.todo{color:var(--ink-500);}
+  .uat-prog{flex:1 1 100%;height:7px;background:var(--ink-100);border-radius:999px;overflow:hidden;display:flex;}
+  .uat-prog>span{height:100%;display:block;}
+  .uat-prog .b-pass{background:var(--ok);} .uat-prog .b-fail{background:var(--pttep);} .uat-prog .b-block{background:#f59e0b;}
+  .uat-btn{cursor:pointer;font-size:12px;padding:5px 11px;border:1px solid var(--ink-300);border-radius:4px;
+    background:var(--paper);color:var(--ink-700);font-weight:500;}
+  .uat-btn:hover{background:var(--ink-100);}
+  td.result{width:150px;}
+  .res-btns{display:flex;gap:3px;justify-content:center;}
+  .res-btn{cursor:pointer;border:1px solid var(--ink-300);background:var(--paper);border-radius:4px;
+    padding:3px 0;width:30px;text-align:center;font-size:11px;font-weight:600;color:var(--ink-500);user-select:none;}
+  .res-btn:hover{background:var(--ink-100);}
+  .res-btn.sel-pass{background:var(--ok);color:#fff;border-color:var(--ok);}
+  .res-btn.sel-fail{background:var(--pttep);color:#fff;border-color:var(--pttep);}
+  .res-btn.sel-block{background:#f59e0b;color:#fff;border-color:#f59e0b;}
+  .res-note{margin-top:5px;width:100%;font-size:11px;padding:3px 5px;border:1px solid var(--ink-200);
+    border-radius:3px;font-family:var(--sans);color:var(--ink-800);}
+  .res-note::placeholder{color:var(--ink-400);}
+  @media print{.uat-toolbar{position:static;box-shadow:none;} .res-btn{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+</style>
+</head>
+<body>
+<div class="page">
+<header class="cover">
+<div class="logo-row">
+<img alt="PTTEP" src="data:image/png;base64,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"/>
+<div class="brand">
+      PTT Exploration and Production
+      <small>Internal Data Tool · Digital X (ODX)</small>
+</div>
+</div>
+<h1>MPP — Master Procurement Plan</h1>
+<p class="subtitle">User Acceptance Testing (UAT) — <b>Core End-to-End Scenarios</b> (filtered subset)</p>
+<dl class="meta">
+<dt>System under test</dt><dd>MPP — Master Procurement Plan (Flask shell + React island)</dd>
+<dt>Environment</dt><dd>UAT — <a href="https://mpp-uat.apps.pttep.com/#/home"><code>https://mpp-uat.apps.pttep.com/#/home</code></a></dd>
+<dt>Authentication</dt><dd>Entra ID (App Roles) · cookie session in Firestore</dd>
+<dt>Document version</dt><dd>v1.1 · 2026-06-14 (APP-2026 v3 schema &amp; rules)</dd>
+<dt>Prepared by</dt><dd>MPP project team</dd>
+<dt>Scope</dt><dd>45 scenarios — core paths + same-department read-only, delete DRAFT, Admin cancel, FINAL-gated export, Email Notifications, approver-chain skip routing (no VP/SVP) &amp; aggregate-then-notify</dd><dt>Issue log</dt><dd><a href="https://tharidsawan.github.io/uat-appampp-x7k2/feedback.html">UAT Issue Log</a> — log / update issues found during UAT</dd>
+<dt>UAT report</dt><dd><a href="https://tharidsawan.github.io/uat-appampp-x7k2/">UAT Report</a></dd>
+<dt>Impersonate (Admin)</dt><dd>Append <code>?act_as=&lt;email&gt;</code> to the base URL to act as another user — e.g. <a href="https://mpp-uat.apps.pttep.com/?act_as=mayladap@pttep.com"><code>https://mpp-uat.apps.pttep.com/?act_as=mayladap@pttep.com</code></a>. A banner "Acting as …" should appear; remove the parameter to return to your own identity.</dd>
+</dl>
+</header>
+<section>
+<h2><span class="ord">01</span>Authentication &amp; Session</h2>
+<p class="group-note">Verify sign-in via Entra ID, session lifetime, and URL-prefix behaviour behind the load balancer.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th>
+<th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="id">AUTH-01</td>
+<td class="title">Sign in with valid PTTEP account
+          <ol class="steps">
+<li>Open the UAT URL in a private/incognito window.</li>
+<li>Click the Microsoft sign-in prompt; complete MFA.</li>
+<li>Land on the MPP home view.</li>
+</ol>
+<div class="expected"><b>Expected:</b> Topbar shows the user's photo, name, job title and department; sidebar lists MPP.</div>
+</td>
+<td class="role"><span class="tag role">Any signed-in user</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">AUTH-02</td>
+<td class="title">Unauthenticated request redirects to /login
+          <div class="expected"><b>Expected:</b> Hitting <code>https://mpp-uat.apps.pttep.com/#/home</code> without a session redirects to <code>/login</code>; API calls return <code>401</code>.</div>
+</td>
+<td class="role"><span class="tag role">Anonymous</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">AUTH-04</td>
+<td class="title">Sign-out clears server-side session
+          <div class="expected"><b>Expected:</b> After sign-out, returning to <code>/mpp</code> redirects to <code>/login</code>.</div>
+</td>
+<td class="role"><span class="tag role">Any signed-in user</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section>
+<h2><span class="ord">02</span>Role Resolution &amp; RBAC</h2>
+<p class="group-note"><code>mpp_admin / asset / procurement_manager / procurement_officer</code> come from Entra App Roles. The approval chain (<code>user_manager / user_vp / user_svp</code>) and the focal point (<code>user</code>) are <b>derived from plan data</b> — a logged-in user whose email is named on a plan as owner / manager / VP / SVP picks up the matching role automatically (most senior wins). No in-app switcher.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th><th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="id">ROLE-02</td>
+<td class="title">Each Entra-assigned role resolves to the correct UI
+          <ol class="steps">
+<li>For <code>mpp_admin / asset / procurement_manager / procurement_officer</code>: assign the App Role in the Enterprise Application.</li>
+<li>Sign in; check sidebar nav, home view, persona chip, and FORWARD/BACK button labels.</li>
+</ol>
+<div class="expected"><b>Expected:</b> Asset → "Asset Review" queue; Proc Mgr → "PM Assign / PM Review" queues; Proc Officer → "Officer Review" inbox; Admin → tabbed dashboard of all gates. (Manager/VP/SVP are covered by <code>ROLE-05</code> — they no longer require an Entra App Role.)</div>
+</td>
+<td class="role"><span class="tag role">Admin / Asset / PM / Officer</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">ROLE-05</td>
+<td class="title">Approver chain (Manager / VP / SVP) is derived from plan data — no Entra App Role needed
+          <ol class="steps">
+<li>Pick a PTTEP account that has <i>no</i> MPP App Role assigned in the Enterprise Application.</li>
+<li>As any Focal Point, create a plan that names this account's email as <code>approverEmail</code> / <code>approverVpEmail</code> / <code>approverSvpEmail</code> (any of the three).</li>
+<li>Sign in as the test account.</li>
+</ol>
+<div class="expected"><b>Expected:</b> The user lands on the Approver "Inbox" view immediately (no sign-out cycle, no Enterprise Application change). The plan appears in their inbox; <code>/api/mpp/whoami</code> reports <code>resolvedFrom: "derived"</code> with <code>derivedMatch</code> set to the most senior tier on which the email appears (SVP &gt; VP &gt; Manager &gt; Owner). Approve/Reject actions on the matching gate work end-to-end.</div>
+</td>
+<td class="role"><span class="tag role">Manager / VP / SVP · no App Role</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section>
+<h2><span class="ord">03</span>Reference Data &amp; Schema</h2>
+<p class="group-note"><code>/api/mpp/reference</code> drives the grid columns, dropdowns, statuses and approver options. Verify the schema renders end-to-end.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th><th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="id">REF-04</td>
+<td class="title">APP Year defaults to next year; Register Type auto-set
+          <ol class="steps">
+<li>Start a new plan and look at the APP Year field.</li>
+<li>Read the Register Type column.</li>
+</ol>
+<div class="expected"><b>Expected:</b> APP Year pre-fills to the current calendar year + 1 (e.g. 2027 in 2026) — PTTEP plans a year ahead; the user can still override it. Register Type reads "Original" (it would be "Ad-hoc" only if APP Year is the current year or earlier).</div>
+</td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">REF-06</td>
+<td class="title">CS-Criteria auto-populate &amp; FX-based AMPP
+          <div class="expected"><b>Expected:</b> For a PSC row, CS-Criteria (a)→(d) auto-fill from ECV(X), Procurement Method, Thai-vendor, Shared-cost and Total PSC Value vs the FX-converted thresholds ((e) stays user-selected; none → blank). The AMPP Indicator flips to Required when a block's annual ECV exceeds the FX-converted AMPP threshold. The threshold version + FX rate are snapshotted onto the record at evaluate/approve.</div>
+</td>
+<td class="role"><span class="tag role">MPP Admin / Asset</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section>
+<h2><span class="ord">04</span>Title Creation — Focal Point</h2>
+<p class="group-note">Two equal entry paths: bulk Excel import or interactive new-title flow. Plan ownership and approver chain (manager → VP → SVP) are captured at creation.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th><th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="id">NEW-02</td>
+<td class="title">Import a valid filled template
+          <ol class="steps">
+<li>Fill a small APP file (3–5 rows) with required fields.</li>
+<li>Upload via <em>Import XLSX</em>.</li>
+<li>Preview the parsed rows.</li>
+</ol>
+<div class="expected"><b>Expected:</b> Every row appears in the grid with values intact; money/date types parsed; no spurious validation errors.</div>
+</td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">NEW-04</td>
+<td class="title">Approver chain resolves from Graph (manager → VP → SVP)
+          <ol class="steps">
+<li>Start a new title; enter the plan name + year.</li>
+<li>Wait for the approver chain to resolve.</li>
+</ol>
+<div class="expected"><b>Expected:</b> Resolved names appear; falls back to the position label if Graph cannot resolve a level.</div>
+</td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">NEW-06</td>
+<td class="title">REQUIRED-field validation blocks submission
+          <div class="expected"><b>Expected:</b> A row missing any REQUIRED field cannot be submitted; the offending cells are highlighted with a tooltip.</div>
+</td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">NEW-08</td>
+<td class="title">Conditional show/require gates fire correctly
+          <ol class="steps">
+<li>Set Requirement = Contract Replacement.</li>
+<li>Set Carry Over = Yes.</li>
+<li>On a PSC row set Shared cost of Good/Services? = Yes.</li>
+<li>Set Source of ECV = (6) Others.</li>
+</ol>
+<div class="expected"><b>Expected:</b> Each trigger reveals AND requires its fields: Contract Replacement → Current Contract No./Effective/Expiry; Carry Over=Yes → Previous APP No. + Justification; Shared cost=Yes → Cost Allocation Procedure; Source of ECV=(6) Others → the specify field; PC Type=PC II → BoD Type (at the procurement step). Submit is blocked until the revealed fields are filled, and the same rule applies in the grid, the detail view, and the server submit gate.</div>
+</td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">NEW-10</td>
+<td class="title">APP Number is assigned only at finalize and then locked
+          <div class="expected"><b>Expected:</b> A plan has NO APP Number while DRAFT / in-progress; only on FINALIZED does the row receive MPP-TH-YY-NNNNN (YY = APP Year), and it never changes afterward. The Item No. (ITM-NNNNNN) is the stable reference used before then.</div>
+</td>
+<td class="role"><span class="tag role">MPP Admin / system</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section>
+<h2><span class="ord">05</span>Per-Title Workflow — End to End</h2>
+<p class="group-note">Verify each step in the pipeline: <code>DRAFT → ADMIN_INTAKE → ASSET_REVIEW → ADMIN_CONSOLIDATE → PM_ASSIGN → OFFICER_REVIEW → PM_REVIEW → ADMIN_ESCALATE → USER_MGR → VP → SVP → FINALIZED</code>. "Procure by User" skips the Procurement arm; sub-1 MMUSD finalises at the User Manager.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th><th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="id">WF-01</td>
+<td class="title">Submit a valid title (DRAFT → ADMIN_INTAKE)
+          <div class="expected"><b>Expected:</b> Status pill flips to <code>ADMIN_INTAKE</code>; activity log records "submitted" with the real signed-in user as author.</div>
+</td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-02</td>
+<td class="title">Admin advances intake (ADMIN_INTAKE → ASSET_REVIEW)
+          <div class="expected"><b>Expected:</b> Admin sees an <em>Advance</em> button only; no <em>Reject</em>. Title moves into the Asset queue.</div>
+</td>
+<td class="role"><span class="tag role">MPP Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-03</td>
+<td class="title">Asset Lead approves (ASSET_REVIEW → ADMIN_CONSOLIDATE)
+          <div class="expected"><b>Expected:</b> Approve transitions the title; activity log captures actor + optional note.</div>
+</td>
+<td class="role"><span class="tag role">Asset Lead</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-04</td>
+<td class="title">Procure-by-User routes around the procurement arm
+          <ol class="steps">
+<li>Create a title with <em>Procure by User = Yes</em>.</li>
+<li>Drive it through ADMIN_CONSOLIDATE.</li>
+</ol>
+<div class="expected"><b>Expected:</b> Title jumps directly to <code>USER_MGR_APPROVAL</code> and skips PM_ASSIGN / OFFICER_REVIEW / PM_REVIEW.</div>
+</td>
+<td class="role"><span class="tag role">MPP Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-05</td>
+<td class="title">Procure-by-Procurement track (PM assigns an officer)
+          <div class="expected"><b>Expected:</b> Proc Manager picks an officer from the AD picker; <code>assignedOfficerEmail</code> persists; title moves to <code>OFFICER_REVIEW</code>.</div>
+</td>
+<td class="role"><span class="tag role">Procurement Manager</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-06</td>
+<td class="title">Officer "Send to Manager" (OFFICER_REVIEW → PM_REVIEW)
+          <div class="expected"><b>Expected:</b> Only the assigned officer can act (identity gate); other officers cannot see the row.</div>
+</td>
+<td class="role"><span class="tag role">Procurement Officer</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-07</td>
+<td class="title">PM_REVIEW reject bounces to OFFICER_REVIEW (not REJECTED)
+          <div class="expected"><b>Expected:</b> Submitter is not re-engaged; the same officer revises and re-sends.</div>
+</td>
+<td class="role"><span class="tag role">Procurement Manager</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-08</td>
+<td class="title">1 MMUSD threshold — sub-1 MMUSD finalises at User Manager
+          <div class="expected"><b>Expected:</b> Title with Total ECV &lt; 1 MMUSD goes <code>USER_MGR_APPROVAL → FINALIZED</code>; ≥ 1 MMUSD goes to VP.</div>
+</td>
+<td class="role"><span class="tag role">User Manager</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-09</td>
+<td class="title">VP &amp; SVP approvals chain correctly
+          <div class="expected"><b>Expected:</b> VP approval moves to SVP; SVP approval finalises. If the plan has no VP, the title escalates directly to SVP.</div>
+</td>
+<td class="role"><span class="tag role">VP / SVP</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-10</td>
+<td class="title">Reject returns the title to the submitter as REJECTED
+          <div class="expected"><b>Expected:</b> Reject from Asset / User Mgr / VP / SVP sends the title to <code>REJECTED</code>; required comment captured in the activity log.</div>
+</td>
+<td class="role"><span class="tag role">Asset / Mgr / VP / SVP</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-11</td>
+<td class="title">Revise &amp; resubmit a REJECTED title
+          <div class="expected"><b>Expected:</b> Submitter can edit the row again and Submit; title flows <code>REJECTED → ADMIN_INTAKE</code>.</div>
+</td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-13</td>
+<td class="title">Owner deletes a DRAFT record
+<ol class="steps"><li>As the plan owner, create or open a title that is in DRAFT status.</li><li>Trigger the Delete action on the draft row / record.</li><li>Confirm the deletion prompt.</li></ol>
+<div class="expected"><b>Expected:</b> The DRAFT record is permanently removed from the plan and no longer appears in any list or export. The Delete action is available <b>only</b> while status = DRAFT; submitted/in-progress records cannot be deleted (use Cancel instead).</div>
+</td>
+<td class="role"><span class="tag role">Focal point (plan owner)</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">WF-14</td>
+<td class="title">MPP Admin cancels a record at any stage
+<ol class="steps"><li>Sign in as MPP Admin.</li><li>Select records sitting at different stages (e.g., ASSET_REVIEW, PM_REVIEW, VP, SVP).</li><li>Use the Cancel action on each and confirm the prompt.</li></ol>
+<div class="expected"><b>Expected:</b> Admin can cancel a record from <b>any</b> workflow stage. Status moves to CANCELLED, the title is locked from further transitions, and the activity log records the admin cancellation with timestamp and actor. This Cancel-anywhere action is visible only to MPP Admin.</div>
+</td>
+<td class="role"><span class="tag role">MPP Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">WF-15</td>
+<td class="title">Department with no VP routes Manager → SVP
+<ol class="steps"><li>Select / submit a title in a department whose approval chain has <strong>no VP</strong>.</li><li>Approve at the Manager level.</li></ol>
+<div class="expected"><b>Expected:</b> The system skips the VP tier and routes <b>Manager → SVP</b> directly; status and approval queue are correct, with no dangling VP step in the path.</div>
+</td>
+<td class="role"><span class="tag role">Approver chain</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">WF-16</td>
+<td class="title">Department with no SVP routes Manager → EVP
+<ol class="steps"><li>Select / submit a title in a department whose approval chain has <strong>no SVP</strong>.</li><li>Approve up the chain to the highest tier present (Manager / VP).</li></ol>
+<div class="expected"><b>Expected:</b> The system skips the SVP tier and routes <b>Manager → EVP</b>; status and approval queue are correct, with no dangling SVP step in the path.</div>
+</td>
+<td class="role"><span class="tag role">Approver chain</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr></tbody>
+</table>
+</section>
+<section>
+<h2><span class="ord">06</span>Identity Gating &amp; Visibility</h2>
+<p class="group-note">Approver / officer steps require matching the named person, not just the role. Plan visibility is scoped to people who are personally tied to the plan; admins see everything.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th><th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="id">GATE-01</td>
+<td class="title">Manager A cannot approve a title routed to Manager B
+          <div class="expected"><b>Expected:</b> The Approve/Reject buttons are disabled; backend returns <code>403</code> if forced.</div>
+</td>
+<td class="role"><span class="tag role">User Manager</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">GATE-02</td>
+<td class="title">Officer A cannot see titles assigned to Officer B
+          <div class="expected"><b>Expected:</b> The Officer Inbox lists only rows where <code>assignedOfficerEmail</code> matches the signed-in user.</div>
+</td>
+<td class="role"><span class="tag role">Procurement Officer</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">GATE-03</td>
+<td class="title">Focal point sees only their own plans
+          <div class="expected"><b>Expected:</b> Titles list scoped to plans where <code>ownerEmail = signed-in user</code>; another focal point's plans are not visible.</div>
+</td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">GATE-05</td>
+<td class="title">MPP Admin sees the full pipeline across all plans
+          <div class="expected"><b>Expected:</b> Admin dashboard tabs cover every status with the correct counts.</div>
+</td>
+<td class="role"><span class="tag role">MPP Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">GATE-06</td>
+<td class="title">Same-department peers are read-only (view, not edit)
+<ol class="steps"><li>Sign in as User A who belongs to Department X and owns at least one plan.</li><li>Open the Titles / plans list and locate a record owned by User B in the same Department X.</li><li>Open User B's record and try to edit a cell, change a value, or change its status.</li></ol>
+<div class="expected"><b>Expected:</b> User A can <b>view</b> every record belonging to their own department, but all edit/save controls are disabled (read-only) on records User A does not own. Only the record owner can modify it. Records from other departments are not visible.</div>
+</td>
+<td class="role"><span class="tag role">Focal point (dept peer)</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr></tbody>
+</table>
+</section>
+<section>
+<h2><span class="ord">07</span>Comments &amp; Activity Log</h2>
+<p class="group-note">Per-cell comments + per-plan activity log; workflow transitions are recorded with the real signed-in identity.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th><th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody>
+<tr>
+<td class="id">COM-02</td>
+<td class="title">Rejecting requires a comment (or a decision tag)
+          <div class="expected"><b>Expected:</b> Reject button stays disabled until a free-text reason or one of the quick tags is selected.</div>
+</td>
+<td class="role"><span class="tag role">Approver roles</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">COM-03</td>
+<td class="title">Activity feed records every transition
+          <div class="expected"><b>Expected:</b> Submit, Approve, Reject, Cancel and Advance each leave an entry with actor + status delta in chronological order.</div>
+</td>
+<td class="role"><span class="tag role">All roles</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section>
+<h2><span class="ord">08</span>Export &amp; Reporting</h2>
+<p class="group-note">Export to Excel is permitted only when the request status = FINALIZED. Finalised PSC-funded plans can be exported to the PSC template. Round-trip an APP file (import → grid → export) and verify no data loss.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th><th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody><tr>
+<td class="id">EXP-01</td>
+<td class="title">Export a FINALIZED plan to xlsx
+<ol class="steps"><li>Open a plan whose request status = FINALIZED.</li><li>Click Export to Excel.</li></ol>
+<div class="expected"><b>Expected:</b> Download file <code>&lt;planId&gt;-APP.xlsx</code>; opens in Excel; columns and values match the on-screen grid. Export is enabled because status = FINALIZED.</div>
+</td>
+<td class="role"><span class="tag role">Focal point / Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">EXP-01b</td>
+<td class="title">Export is blocked before FINAL
+<ol class="steps"><li>Open a plan at a non-final status (e.g., DRAFT, ASSET_REVIEW, PM_REVIEW).</li><li>Look for / attempt the Export to Excel action.</li></ol>
+<div class="expected"><b>Expected:</b> The Export control is disabled (or returns a clear "only available when status = FINALIZED" message). No file is produced for non-final requests.</div>
+</td>
+<td class="role"><span class="tag role">Focal point / Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr></tbody>
+</table>
+</section><section>
+<h2><span class="ord">09</span>Email Notifications</h2>
+<p class="group-note">Verify that notification emails fire <strong>at the correct moment of each workflow transition</strong> and reach the right recipients. Expected results state only the recipient and the gist of the message — no detailed mail-content checks.</p>
+<table>
+<thead><tr>
+<th style="width:70px">ID</th>
+<th>Test case</th>
+<th style="width:180px">Role / actor</th>
+<th style="width:90px">Priority</th>
+<th style="width:110px">Result</th>
+</tr></thead>
+<tbody><tr>
+<td class="id">MAIL-01</td>
+<td class="title">Submit a title triggers notification to Admin
+<ol class="steps"><li>Submit a DRAFT title (DRAFT → ADMIN_INTAKE).</li></ol>
+<div class="expected"><b>Expected:</b> Sent to: MPP Admin — informs that a new title has been submitted and is awaiting intake.</div>
+</td>
+<td class="role"><span class="tag role">System → Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">MAIL-02</td>
+<td class="title">Assignment to an approver emails that approver
+<ol class="steps"><li>Advance a title so it lands in an approver's gate (e.g., Asset Lead / PM / Officer / VP / SVP).</li></ol>
+<div class="expected"><b>Expected:</b> Sent to: the next approver in the queue — informs that an item is awaiting their review / approval.</div>
+</td>
+<td class="role"><span class="tag role">System → next approver</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">MAIL-03</td>
+<td class="title">Officer assignment by PM emails the Officer
+<ol class="steps"><li>PM assigns a procurement officer to a title.</li></ol>
+<div class="expected"><b>Expected:</b> Sent to: the assigned Officer — informs that a new item has been assigned to them.</div>
+</td>
+<td class="role"><span class="tag role">System → Officer</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">MAIL-04</td>
+<td class="title">Reject emails the submitter
+<ol class="steps"><li>Reject a title at any approval gate.</li></ol>
+<div class="expected"><b>Expected:</b> Sent to: the submitter / owner — informs that the item was sent back, with a brief reason.</div>
+</td>
+<td class="role"><span class="tag role">System → submitter</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">MAIL-05</td>
+<td class="title">Finalize emails the plan owner
+<ol class="steps"><li>Complete the chain so the title becomes FINALIZED.</li></ol>
+<div class="expected"><b>Expected:</b> Sent to: the plan owner — informs that the item is fully approved and FINALIZED.</div>
+</td>
+<td class="role"><span class="tag role">System → owner</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">MAIL-06</td>
+<td class="title">Cancel emails affected parties
+<ol class="steps"><li>MPP Admin (or owner) cancels a title.</li></ol>
+<div class="expected"><b>Expected:</b> Sent to: the plan owner and the actors in the queue — informs that the item has been cancelled.</div>
+</td>
+<td class="role"><span class="tag role">System → owner + actors</span></td>
+<td class="priority"><span class="tag p-should">Should</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">MAIL-07</td>
+<td class="title">Email timing &amp; no duplicates
+<ol class="steps"><li>Walk a title through several transitions in sequence.</li><li>Check the mailbox after each step.</li></ol>
+<div class="expected"><b>Expected:</b> Emails fire at the correct moment for each transition (not before / after the wrong step) and there are no duplicate emails per event.</div>
+</td>
+<td class="role"><span class="tag role">System</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">MAIL-08</td>
+<td class="title">VP notified only after ALL Managers under that VP approve (bulk)
+<ol class="steps"><li>Submit a bulk of records that route to several Managers under the same VP.</li><li>Have Managers approve one by one and check the VP mailbox after each.</li><li>Approve the last remaining Manager.</li></ol>
+<div class="expected"><b>Expected:</b> Sent to: VP — informs of items awaiting approval. The email fires <strong>only once, after all Managers under that VP have approved</strong>; before completion the VP receives nothing.</div>
+</td>
+<td class="role"><span class="tag role">System → VP</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr><tr>
+<td class="id">MAIL-09</td>
+<td class="title">SVP notified only after ALL VPs under that SVP approve
+<ol class="steps"><li>Submit records that route to several VPs under the same SVP.</li><li>Have VPs approve one by one and check the SVP mailbox.</li><li>Approve the last remaining VP.</li></ol>
+<div class="expected"><b>Expected:</b> Sent to: SVP — informs of items awaiting approval. The email fires <strong>only after all VPs under that SVP have approved</strong>.</div>
+</td>
+<td class="role"><span class="tag role">System → SVP</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr></tbody>
+</table>
+</section>
+<div class="legend">
+<span><strong>Must</strong> — release blocker</span>
+<span><strong>Should</strong> — fix before go-live if feasible</span>
+<span><strong>Could</strong> — nice-to-have / next iteration</span>
+</div>
+<section class="signoff">
+<h2><span class="ord">SIGN</span>UAT Sign-off</h2>
+<p class="group-note">By signing below, the parties confirm that the test cases above were executed and the results recorded are an accurate record of system behaviour observed during UAT.</p>
+<div class="sign-grid">
+<div class="sign-cell">
+<label>Business owner</label>
+<div class="line"></div>
+<small>Name · Position · Date</small>
+</div>
+<div class="sign-cell">
+<label>Procurement representative</label>
+<div class="line"></div>
+<small>Name · Position · Date</small>
+</div>
+<div class="sign-cell">
+<label>IT / Project manager</label>
+<div class="line"></div>
+<small>Name · Position · Date</small>
+</div>
+<div class="sign-cell">
+<label>Quality assurance</label>
+<div class="line"></div>
+<small>Name · Position · Date</small>
+</div>
+</div>
+</section>
+<footer class="foot">
+  PTTEP · Master Procurement Plan · UAT script v1.0 · Generated 2026-05-28 · Powered by DigitalX (ODX)
+</footer>
+</div>
+
+<script id="uat-mark-script">
+(function(){
+  var DRIVE_URL="https://script.google.com/macros/s/AKfycbyPvX50kUao4_IoaDgwjVwRWuL2_Pc7x3q2523SnXyD-jQeJDpGoSRtz-_oF1TUGQ0K/exec";
+  var KEY="uat-mpp-core-results-v1";
+  var store=JSON.parse(localStorage.getItem(KEY)||"{}");
+  var meta=JSON.parse(localStorage.getItem(KEY+"-meta")||"{}");
+  function save(){localStorage.setItem(KEY,JSON.stringify(store));}
+  function saveMeta(){localStorage.setItem(KEY+"-meta",JSON.stringify(meta));}
+
+  var rows=[];
+  document.querySelectorAll("tr").forEach(function(tr){
+    var idc=tr.querySelector("td.id"); var rc=tr.querySelector("td.result");
+    if(!idc||!rc) return;
+    var id=idc.textContent.trim();
+    var titleCell=tr.querySelector("td.title");
+    var title=titleCell?(titleCell.childNodes[0]?titleCell.childNodes[0].textContent.trim():""):"";
+    var h2=null,p=tr.closest("section"); if(p) h2=p.querySelector("h2");
+    var section=h2?h2.textContent.replace(/\s+/g," ").trim():"";
+    rows.push({id:id,title:title,section:section});
+    var rec=store[id]||{r:"",note:""};
+
+    rc.innerHTML="";
+    var wrap=document.createElement("div"); wrap.className="res-btns";
+    [["pass","P","Pass"],["fail","F","Fail"],["block","B","Blocked"]].forEach(function(o){
+      var b=document.createElement("div"); b.className="res-btn"; b.textContent=o[1]; b.title=o[2];
+      if(rec.r===o[0]) b.classList.add("sel-"+o[0]);
+      b.onclick=function(){
+        rec.r=(rec.r===o[0])?"":o[0]; store[id]=rec; save();
+        wrap.querySelectorAll(".res-btn").forEach(function(x,i){
+          x.className="res-btn"; var k=["pass","fail","block"][i];
+          if(rec.r===k) x.classList.add("sel-"+k);
+        });
+        refresh();
+      };
+      wrap.appendChild(b);
+    });
+    rc.appendChild(wrap);
+    var note=document.createElement("input"); note.className="res-note"; note.type="text";
+    note.placeholder="note…"; note.value=rec.note||"";
+    note.oninput=function(){rec.note=note.value; store[id]=rec; save();};
+    rc.appendChild(note);
+  });
+
+  // toolbar
+  var tb=document.createElement("div"); tb.className="uat-toolbar";
+  tb.innerHTML=
+    '<div class="field"><label>Tester</label><input id="uat-tester" type="text" placeholder="your name"></div>'+
+    '<div class="field"><label>Date</label><input id="uat-date" type="date"></div>'+
+    '<div class="uat-summary" id="uat-sum"></div>'+
+    '<div class="uat-prog" id="uat-prog"></div>'+
+    '<button class="uat-btn" id="uat-drive">Submit result</button>'+
+    '<button class="uat-btn" id="uat-export">Export CSV</button>'+
+    '<button class="uat-btn" id="uat-reset">Reset all</button>';
+  var page=document.querySelector(".page");
+  var cover=page.querySelector("header.cover");
+  cover.parentNode.insertBefore(tb, cover.nextSibling);
+
+  var tin=document.getElementById("uat-tester"), din=document.getElementById("uat-date");
+  tin.value=meta.tester||""; din.value=meta.date||"";
+  tin.oninput=function(){meta.tester=tin.value;saveMeta();};
+  din.oninput=function(){meta.date=din.value;saveMeta();};
+
+  function payload(){
+    var L={pass:"Pass",fail:"Fail",block:"Blocked","":"Not run"};
+    return {tester:meta.tester||"",date:meta.date||"",
+      results:rows.map(function(r){var rec=store[r.id]||{};
+        return {section:r.section,id:r.id,title:r.title,result:L[rec.r||""],note:rec.note||""};})};
+  }
+  function toast(msg,ok){
+    var t=document.createElement("div");t.textContent=msg;
+    t.style.cssText="position:fixed;left:50%;bottom:28px;transform:translateX(-50%);z-index:200;"+
+      "padding:10px 18px;border-radius:6px;font-size:13px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.25);"+
+      "background:"+(ok?"#047857":"#b45309")+";";
+    document.body.appendChild(t);setTimeout(function(){t.remove();},3200);
+  }
+  function jsonp(url,cb){
+    var name="__uatCb_"+Date.now();
+    var done=false;
+    var s=document.createElement("script");
+    function fin(d){ if(done)return; done=true; try{delete window[name];}catch(e){window[name]=undefined;}
+      if(s.parentNode)s.parentNode.removeChild(s); cb(d); }
+    window[name]=function(d){fin(d);};
+    s.onerror=function(){fin(null);};
+    s.src=url+(url.indexOf("?")>-1?"&":"?")+"callback="+name+"&t="+Date.now();
+    document.body.appendChild(s);
+    setTimeout(function(){fin(null);},6000);
+  }
+
+  function counts(){var c={pass:0,fail:0,block:0,todo:0};rows.forEach(function(r){
+    var v=(store[r.id]||{}).r; if(v==="pass")c.pass++;else if(v==="fail")c.fail++;else if(v==="block")c.block++;else c.todo++;});return c;}
+  function refresh(){
+    var c=counts(),t=rows.length,done=t-c.todo;
+    document.getElementById("uat-sum").innerHTML=
+      '<span class="chip pass">Pass '+c.pass+'</span>'+
+      '<span class="chip fail">Fail '+c.fail+'</span>'+
+      '<span class="chip block">Blocked '+c.block+'</span>'+
+      '<span class="chip todo">Not run '+c.todo+'</span>'+
+      '<span class="chip">'+done+'/'+t+' ('+Math.round(done/t*100)+'%)</span>';
+    var pr=document.getElementById("uat-prog");
+    pr.innerHTML='<span class="b-pass" style="width:'+(c.pass/t*100)+'%"></span>'+
+      '<span class="b-fail" style="width:'+(c.fail/t*100)+'%"></span>'+
+      '<span class="b-block" style="width:'+(c.block/t*100)+'%"></span>';
+  }
+  refresh();
+
+  document.getElementById("uat-reset").onclick=function(){
+    if(confirm("Clear all marked results and notes?")){store={};save();location.reload();}
+  };
+  document.getElementById("uat-drive").onclick=function(){
+    var url=DRIVE_URL;
+    var btn=this; btn.textContent="Saving…"; btn.disabled=true;
+    fetch(url,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(payload())})
+      .then(function(){
+        jsonp(url,function(d){
+          if(d&&d.ok){toast("Saved to Google Drive \u2713  Sheet now has "+d.rows+" result rows.",true);}
+          else{toast("Sent to Drive \u2713 (couldn't read confirmation \u2014 open the sheet to verify).",true);}
+          btn.textContent="Submit result";btn.disabled=false;
+        });
+      })
+      .catch(function(){
+        toast("Could not reach the Drive endpoint \u2014 check the URL / deployment.",false);
+        btn.textContent="Submit result";btn.disabled=false;
+      });
+  };
+  document.getElementById("uat-export").onclick=function(){
+    var L={pass:"Pass",fail:"Fail",block:"Blocked",""  :"Not run"};
+    var lines=[["Tester","Date","Section","ID","Test case","Result","Note"]];
+    rows.forEach(function(r){var rec=store[r.id]||{};
+      lines.push([meta.tester||"",meta.date||"",r.section,r.id,r.title,L[rec.r||""],rec.note||""]);});
+    var csv=lines.map(function(row){return row.map(function(c){
+      c=(c==null?"":String(c)); return '"'+c.replace(/"/g,'""')+'"';}).join(",");}).join("\r\n");
+    var blob=new Blob(["﻿"+csv],{type:"text/csv;charset=utf-8;"});
+    var a=document.createElement("a"); a.href=URL.createObjectURL(blob);
+    a.download="uat-results-"+(meta.date||new Date().toISOString().slice(0,10))+".csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  };
+})();
+</script>
+</body>
+</html>
