@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>MPP UAT — Results Dashboard</title>
+<style>
+  :root{
+    --ink-900:#111827;--ink-800:#1f2937;--ink-700:#374151;--ink-600:#4b5563;--ink-500:#6b7280;
+    --ink-400:#9ca3af;--ink-300:#d1d5db;--ink-200:#e5e7eb;--ink-100:#f3f4f6;--ink-50:#f9fafb;
+    --paper:#fff;--line:#e5e7eb;--pttep:#c8102e;--warn:#b45309;--ok:#047857;--info:#1d4ed8;
+    --radius:6px;--mono:ui-monospace,SFMono-Regular,Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--ink-50);color:var(--ink-900);font-family:var(--sans);font-size:14px;line-height:1.55;}
+  .page{max-width:1080px;margin:0 auto;padding:36px 48px 80px;background:var(--paper);min-height:100vh;border-left:1px solid var(--line);border-right:1px solid var(--line);}
+  header.cover{border-bottom:1px solid var(--line);padding-bottom:22px;margin-bottom:26px;display:flex;align-items:flex-end;gap:18px;flex-wrap:wrap;}
+  h1{margin:0 0 4px;font-size:26px;font-weight:700;letter-spacing:-.01em;}
+  .subtitle{color:var(--ink-600);font-size:14px;margin:0;}
+  .cover .right{margin-left:auto;display:flex;align-items:center;gap:12px;}
+  .updated{font-size:12px;color:var(--ink-500);}
+  .btn{cursor:pointer;font-size:13px;padding:7px 14px;border:1px solid var(--ink-300);border-radius:var(--radius);background:var(--paper);color:var(--ink-700);font-weight:500;}
+  .btn:hover{background:var(--ink-100);}
+  h2{font-size:16px;font-weight:600;margin:32px 0 12px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  thead th{text-align:left;font-weight:600;color:var(--ink-700);background:var(--ink-50);border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:8px 10px;font-size:12px;text-transform:uppercase;letter-spacing:.02em;}
+  tbody td{border-bottom:1px solid var(--line);padding:9px 10px;vertical-align:middle;color:var(--ink-800);}
+  tbody tr:hover{background:var(--ink-50);}
+  td.tester{font-weight:600;}
+  td.id{font-family:var(--mono);font-size:12px;color:var(--ink-600);white-space:nowrap;}
+  td.num{text-align:center;width:64px;font-variant-numeric:tabular-nums;}
+  .pill{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:999px;border:1px solid;}
+  .pill.pass{color:var(--ok);border-color:var(--ok);}
+  .pill.fail{color:#fff;background:var(--pttep);border-color:var(--pttep);}
+  .pill.block{color:var(--warn);border-color:#fcd34d;}
+  .pill.todo{color:var(--ink-500);border-color:var(--ink-300);}
+  .mini{height:6px;border-radius:999px;background:var(--ink-100);overflow:hidden;display:flex;min-width:90px;}
+  .mini>span{display:block;height:100%;}
+  .b-pass{background:var(--ok);} .b-fail{background:var(--pttep);} .b-block{background:#f59e0b;}
+  .totals{display:flex;gap:10px;flex-wrap:wrap;margin:4px 0 0;}
+  .chip{font-size:13px;padding:5px 12px;border-radius:999px;border:1px solid var(--ink-300);font-weight:600;color:var(--ink-700);background:var(--paper);}
+  .chip.pass{color:var(--ok);border-color:var(--ok);} .chip.fail{color:var(--pttep);border-color:var(--pttep);}
+  .chip.block{color:var(--warn);border-color:#fcd34d;} .chip.todo{color:var(--ink-500);}
+  .toolbar{display:flex;gap:12px;align-items:center;margin-bottom:10px;flex-wrap:wrap;}
+  select,input[type=search]{font-family:var(--sans);font-size:13px;padding:6px 9px;border:1px solid var(--ink-300);border-radius:5px;}
+  .state{padding:40px 0;text-align:center;color:var(--ink-500);}
+  .note{color:var(--ink-500);font-size:12px;}
+  a.back{font-size:13px;color:var(--info);text-decoration:none;}
+  a.back:hover{text-decoration:underline;}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="cover">
+    <div>
+      <h1>MPP UAT — Results Dashboard</h1>
+      <p class="subtitle">Latest Pass / Fail submitted by each tester · <a class="back" href="uat-scenario.html">← back to test scenarios</a></p>
+    </div>
+    <div class="right">
+      <span class="updated" id="updated"></span>
+      <button class="btn" id="refresh">Refresh</button>
+    </div>
+  </header>
+
+  <div id="content"><div class="state" id="state">Loading results…</div></div>
+</div>
+
+<script>
+(function(){
+  var DRIVE_URL="https://script.google.com/macros/s/AKfycbyPvX50kUao4_IoaDgwjVwRWuL2_Pc7x3q2523SnXyD-jQeJDpGoSRtz-_oF1TUGQ0K/exec";
+  var ORDER={Pass:0,Fail:1,Blocked:2,"Not run":3};
+
+  function jsonp(action,cb){
+    var name="__dashCb_"+Date.now(),done=false;
+    var s=document.createElement("script");
+    function fin(d){if(done)return;done=true;try{delete window[name];}catch(e){window[name]=undefined;}
+      if(s.parentNode)s.parentNode.removeChild(s);cb(d);}
+    window[name]=function(d){fin(d);};
+    s.onerror=function(){fin(null);};
+    s.src=DRIVE_URL+(DRIVE_URL.indexOf("?")>-1?"&":"?")+"action="+action+"&callback="+name+"&t="+Date.now();
+    document.body.appendChild(s);
+    setTimeout(function(){fin(null);},9000);
+  }
+
+  function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
+  function pill(r){var k=r==="Pass"?"pass":r==="Fail"?"fail":r==="Blocked"?"block":"todo";return '<span class="pill '+k+'">'+esc(r||"Not run")+'</span>';}
+  function fmt(ts){var d=new Date(ts);return isNaN(d)?"":d.toLocaleString();}
+
+  function render(data){
+    var content=document.getElementById("content");
+    if(!data||!data.ok){content.innerHTML='<div class="state">Could not load results. Check that the Apps Script is deployed (re-deploy a new version after adding the results endpoint).</div>';return;}
+    var rows=data.rows||[];
+    if(!rows.length){content.innerHTML='<div class="state">No results submitted yet. Once a tester taps “Submit result”, they appear here.</div>';return;}
+
+    document.getElementById("updated").textContent="Updated "+new Date().toLocaleTimeString();
+
+    // per-tester summary
+    var by={};
+    rows.forEach(function(r){
+      var t=r.tester||"(no name)";
+      by[t]=by[t]||{tester:t,Pass:0,Fail:0,Blocked:0,"Not run":0,total:0,last:0};
+      var res=r.result||"Not run";
+      if(by[t][res]===undefined)res="Not run";
+      by[t][res]++;by[t].total++;
+      var tm=new Date(r.ts).getTime();if(tm>by[t].last)by[t].last=tm;
+    });
+    var testers=Object.keys(by).map(function(k){return by[k];}).sort(function(a,b){return b.last-a.last;});
+
+    // overall
+    var ov={Pass:0,Fail:0,Blocked:0,"Not run":0,total:0};
+    rows.forEach(function(r){var res=r.result||"Not run";if(ov[res]===undefined)res="Not run";ov[res]++;ov.total++;});
+
+    var html="";
+    html+='<div class="totals">'+
+      '<span class="chip pass">Pass '+ov.Pass+'</span>'+
+      '<span class="chip fail">Fail '+ov.Fail+'</span>'+
+      '<span class="chip block">Blocked '+ov.Blocked+'</span>'+
+      '<span class="chip todo">Not run '+ov["Not run"]+'</span>'+
+      '<span class="chip">'+testers.length+' tester'+(testers.length>1?'s':'')+'</span>'+
+    '</div>';
+
+    // summary table
+    html+='<h2>Per-tester summary</h2><table><thead><tr>'+
+      '<th>Tester</th><th>Last submitted</th><th class="num">Pass</th><th class="num">Fail</th>'+
+      '<th class="num">Blocked</th><th class="num">Not run</th><th style="width:130px">Progress</th></tr></thead><tbody>';
+    testers.forEach(function(t){
+      var done=t.Pass+t.Fail+t.Blocked,T=t.total||1;
+      html+='<tr><td class="tester">'+esc(t.tester)+'</td>'+
+        '<td class="note">'+esc(fmt(t.last))+'</td>'+
+        '<td class="num"><span class="pill pass">'+t.Pass+'</span></td>'+
+        '<td class="num"><span class="pill fail">'+t.Fail+'</span></td>'+
+        '<td class="num"><span class="pill block">'+t.Blocked+'</span></td>'+
+        '<td class="num">'+t["Not run"]+'</td>'+
+        '<td><div class="mini">'+
+          '<span class="b-pass" style="width:'+(t.Pass/T*100)+'%"></span>'+
+          '<span class="b-fail" style="width:'+(t.Fail/T*100)+'%"></span>'+
+          '<span class="b-block" style="width:'+(t.Blocked/T*100)+'%"></span>'+
+        '</div><span class="note">'+done+'/'+t.total+'</span></td></tr>';
+    });
+    html+='</tbody></table>';
+
+    // detail
+    html+='<h2>Latest result per test case</h2>'+
+      '<div class="toolbar">'+
+        '<label class="note">Tester</label><select id="f-tester"><option value="">All</option>'+
+          testers.map(function(t){return '<option>'+esc(t.tester)+'</option>';}).join("")+'</select>'+
+        '<label class="note">Result</label><select id="f-res"><option value="">All</option><option>Pass</option><option>Fail</option><option>Blocked</option><option>Not run</option></select>'+
+        '<input type="search" id="f-q" placeholder="search id / test case…" style="min-width:200px">'+
+      '</div>'+
+      '<table><thead><tr><th class="id">ID</th><th>Test case</th><th>Tester</th><th style="width:90px">Result</th><th>Note</th><th class="note" style="width:150px">When</th></tr></thead><tbody id="detail"></tbody></table>';
+
+    content.innerHTML=html;
+
+    var sorted=rows.slice().sort(function(a,b){
+      var r=(ORDER[a.result]||9)-(ORDER[b.result]||9);
+      if(r)return r; return String(a.id).localeCompare(String(b.id),undefined,{numeric:true});
+    });
+    function drawDetail(){
+      var ft=document.getElementById("f-tester").value,
+          fr=document.getElementById("f-res").value,
+          fq=document.getElementById("f-q").value.toLowerCase();
+      var body=sorted.filter(function(r){
+        if(ft&&r.tester!==ft)return false;
+        if(fr&&(r.result||"Not run")!==fr)return false;
+        if(fq&&!((String(r.id)+" "+String(r.title)).toLowerCase().indexOf(fq)>-1))return false;
+        return true;
+      }).map(function(r){
+        return '<tr><td class="id">'+esc(r.id)+'</td><td>'+esc(r.title)+'</td>'+
+          '<td>'+esc(r.tester)+'</td><td>'+pill(r.result)+'</td>'+
+          '<td class="note">'+esc(r.note)+'</td><td class="note">'+esc(fmt(r.ts))+'</td></tr>';
+      }).join("");
+      document.getElementById("detail").innerHTML=body||'<tr><td colspan="6" class="state">No matching rows.</td></tr>';
+    }
+    document.getElementById("f-tester").onchange=drawDetail;
+    document.getElementById("f-res").onchange=drawDetail;
+    document.getElementById("f-q").oninput=drawDetail;
+    drawDetail();
+  }
+
+  function load(){
+    document.getElementById("content").innerHTML='<div class="state">Loading results…</div>';
+    jsonp("results",render);
+  }
+  document.getElementById("refresh").onclick=load;
+  load();
+})();
+</script>
+</body>
+</html>
