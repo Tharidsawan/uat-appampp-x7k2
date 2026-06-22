@@ -68,7 +68,7 @@
 
 <script>
 (function(){
-  var DRIVE_URL="https://script.google.com/macros/s/AKfycbzIjfpCPsiKGbjml-2nZyzoh6BCaxbB029FtF2JdUJUBVw-hPHNoUsNuFYY6j443W2-/exec";
+  var DRIVE_URL="https://script.google.com/macros/s/AKfycbyIoH_RHd50Gh6cPyYvUvBgSbcgQXF5x8TM8PmGi_AIg9yyJt7sNTlX1cM6Gj5iUly2Qg/exec";
   var ORDER={Pass:0,Fail:1,Blocked:2,"Not run":3};
 
   function jsonp(action,cb){
@@ -80,7 +80,7 @@
     s.onerror=function(){fin(null);};
     s.src=DRIVE_URL+(DRIVE_URL.indexOf("?")>-1?"&":"?")+"action="+action+"&callback="+name+"&t="+Date.now();
     document.body.appendChild(s);
-    setTimeout(function(){fin(null);},9000);
+    setTimeout(function(){fin(null);},18000);
   }
 
   function esc(x){return String(x==null?"":x).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];});}
@@ -180,7 +180,12 @@
 
   function load(){
     document.getElementById("content").innerHTML='<div class="state">Loading results…</div>';
-    jsonp("results",render);
+    jsonp("results",function(d){
+      if(d){render(d);return;}
+      // cold start: the script can be slow to wake — retry once before giving up
+      document.getElementById("content").innerHTML='<div class="state">Waking up the script… retrying.</div>';
+      jsonp("results",render);
+    });
   }
   document.getElementById("refresh").onclick=load;
   load();
