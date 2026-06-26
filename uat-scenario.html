@@ -4,7 +4,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1" name="viewport"/>
-<title>MPP — UAT Core Scenarios</title>
+<title>PPR — UAT Core Scenarios</title>
 <style>
   :root {
     --ink-900: #111827;
@@ -307,59 +307,121 @@
       <small>Internal Data Tool · Digital X (ODX)</small>
 </div>
 </div>
-<h1>MPP — Master Procurement Plan</h1>
+<h1>PPR — Procurement Plan</h1>
 <p class="subtitle">User Acceptance Testing (UAT) — <b>Core End-to-End Scenarios</b> (filtered subset)</p>
 <dl class="meta">
-<dt>System under test</dt><dd>MPP — Master Procurement Plan (Flask shell + React island)</dd>
-<dt>Environment</dt><dd>UAT — <a href="https://mpp-uat.apps.pttep.com/#/home"><code>https://mpp-uat.apps.pttep.com/#/home</code></a></dd>
+<dt>System under test</dt><dd>PPR — Procurement Plan (Flask shell + React island)</dd>
+<dt>Environment</dt><dd>UAT — <a href="https://app-uat.apps.pttep.com/#/home"><code>https://app-uat.apps.pttep.com/#/home</code></a></dd>
 <dt>Authentication</dt><dd>Entra ID (App Roles) · cookie session in Firestore</dd>
 <dt>Document version</dt><dd>v1.1 · 2026-06-14 (APP-2026 v3 schema &amp; rules)</dd>
-<dt>Prepared by</dt><dd>MPP project team</dd>
-<dt>Scope</dt><dd>45 scenarios — core paths + same-department read-only, delete DRAFT, Admin cancel, FINAL-gated export, Email Notifications, approver-chain skip routing (no VP/SVP) &amp; aggregate-then-notify</dd><dt>Issue log</dt><dd><a href="https://tharidsawan.github.io/uat-appampp-x7k2/feedback.html">UAT Issue Log</a> — log / update issues found during UAT</dd>
+<dt>Prepared by</dt><dd>PPR project team</dd>
+<dt>Scope</dt><dd>62 scenarios — core paths + same-department read-only, delete DRAFT, Admin cancel, FINAL-gated export, Email Notifications, approver-chain skip routing (no VP/SVP) &amp; aggregate-then-notify</dd><dt>Issue log</dt><dd><a href="https://tharidsawan.github.io/uat-appampp-x7k2/feedback.html">UAT Issue Log</a> — log / update issues found during UAT</dd>
 <dt>UAT report</dt><dd><a href="https://tharidsawan.github.io/uat-appampp-x7k2/">UAT Report</a></dd>
-<dt>Impersonate (Admin)</dt><dd>Append <code>?act_as=&lt;email&gt;</code> to the base URL to act as another user — e.g. <a href="https://mpp-uat.apps.pttep.com/?act_as=mayladap@pttep.com"><code>https://mpp-uat.apps.pttep.com/?act_as=mayladap@pttep.com</code></a>. A banner "Acting as …" should appear; remove the parameter to return to your own identity.</dd>
+<dt>Impersonate (Admin)</dt><dd>Append <code>?act_as=&lt;email&gt;</code> to the base URL to act as another user — e.g. <a href="https://app-uat.apps.pttep.com/?act_as=mayladap@pttep.com"><code>https://app-uat.apps.pttep.com/?act_as=mayladap@pttep.com</code></a>. A banner "Acting as …" should appear; remove the parameter to return to your own identity.</dd>
 </dl>
 </header>
+<section>
+<h2><span class="ord">00</span>End-to-End — Happy Path (Smoke Test)</h2>
+<p class="group-note">One tester walks a <strong>single title through the entire happy path</strong> in order. Tick each transition as you go. If any step fails, stop and log the issue — the later steps depend on it. Full pipeline: <code>DRAFT → ADMIN_INTAKE → ASSET_REVIEW → ADMIN_CONSOLIDATE → PM_ASSIGN → OFFICER_REVIEW → PM_REVIEW → ADMIN_ESCALATE → USER_MGR → VP → SVP → FINALIZED</code>.</p>
+<table>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
+<tbody>
+<tr>
+<td class="id">HF-01</td>
+<td class="title">Submit a new title (DRAFT → ADMIN_INTAKE)<ol class="steps"><li>Create or import a title, fill the required fields, and Submit.</li></ol><div class="expected"><b>Expected:</b> Status moves DRAFT → ADMIN_INTAKE; the title appears in the Admin intake queue; the submitter gets a confirmation/notification.</div></td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-02</td>
+<td class="title">Admin advances intake (ADMIN_INTAKE → ASSET_REVIEW)<ol class="steps"><li>Open the intake item and advance it.</li></ol><div class="expected"><b>Expected:</b> Status → ASSET_REVIEW; routed to the Asset Lead’s queue.</div></td>
+<td class="role"><span class="tag role">PPR Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-03</td>
+<td class="title">Asset Lead approves (ASSET_REVIEW → ADMIN_CONSOLIDATE)<ol class="steps"><li>Review and approve at the Asset gate.</li></ol><div class="expected"><b>Expected:</b> Status → ADMIN_CONSOLIDATE.</div></td>
+<td class="role"><span class="tag role">Asset Lead</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-04</td>
+<td class="title">Admin consolidates & routes to procurement (ADMIN_CONSOLIDATE → PM_ASSIGN)<ol class="steps"><li>Consolidate and send to the Procurement arm.</li></ol><div class="expected"><b>Expected:</b> Status → PM_ASSIGN; appears in the Procurement Manager’s queue.</div></td>
+<td class="role"><span class="tag role">PPR Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-05</td>
+<td class="title">PM assigns an officer (PM_ASSIGN → OFFICER_REVIEW)<ol class="steps"><li>Assign a procurement officer.</li></ol><div class="expected"><b>Expected:</b> Status → OFFICER_REVIEW; the assigned Officer is notified.</div></td>
+<td class="role"><span class="tag role">Procurement Manager</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-06</td>
+<td class="title">Officer sends to manager (OFFICER_REVIEW → PM_REVIEW)<ol class="steps"><li>Complete the officer step and “Send to Manager”.</li></ol><div class="expected"><b>Expected:</b> Status → PM_REVIEW.</div></td>
+<td class="role"><span class="tag role">Procurement Officer</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-07</td>
+<td class="title">PM approves (PM_REVIEW → ADMIN_ESCALATE)<ol class="steps"><li>Approve at the PM gate.</li></ol><div class="expected"><b>Expected:</b> Status → ADMIN_ESCALATE; routed into the management approval chain per the value threshold.</div></td>
+<td class="role"><span class="tag role">Procurement Manager</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-08</td>
+<td class="title">User Manager approves (USER_MGR)<ol class="steps"><li>Approve at the User-Manager gate.</li></ol><div class="expected"><b>Expected:</b> For a sub-1 MM USD title this <b>finalises here</b>; otherwise it escalates to VP.</div></td>
+<td class="role"><span class="tag role">User Manager</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-09</td>
+<td class="title">VP approves (VP)<ol class="steps"><li>Approve at the VP gate.</li></ol><div class="expected"><b>Expected:</b> Status advances toward SVP (for titles above the VP threshold).</div></td>
+<td class="role"><span class="tag role">VP</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-10</td>
+<td class="title">SVP approves → FINALIZED<ol class="steps"><li>Approve at the SVP gate (final approver).</li></ol><div class="expected"><b>Expected:</b> Status → <b>FINALIZED</b>; the APP Number is assigned and locked.</div></td>
+<td class="role"><span class="tag role">SVP</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">HF-11</td>
+<td class="title">Verify final state<ol class="steps"><li>Open the finalized title and review its history.</li></ol><div class="expected"><b>Expected:</b> Status = FINALIZED with a locked APP Number; the activity log shows every transition with actor &amp; timestamp; notifications fired at each gate; the title appears in exports/reporting.</div></td>
+<td class="role"><span class="tag role">Any signed-in user</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+</tbody>
+</table>
+</section>
 <section>
 <h2><span class="ord">01</span>Authentication &amp; Session</h2>
 <p class="group-note">Verify sign-in via Entra ID, session lifetime, and URL-prefix behaviour behind the load balancer.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th>
-<th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
 <tbody>
 <tr>
 <td class="id">AUTH-01</td>
-<td class="title">Sign in with valid PTTEP account
-          <ol class="steps">
-<li>Open the UAT URL in a private/incognito window.</li>
-<li>Click the Microsoft sign-in prompt; complete MFA.</li>
-<li>Land on the MPP home view.</li>
-</ol>
-<div class="expected"><b>Expected:</b> Topbar shows the user's photo, name, job title and department; sidebar lists MPP.</div>
-</td>
+<td class="title">Sign in with valid PTTEP account<ol class="steps"><li>Open the UAT URL in a private/incognito window.</li><li>Click the Microsoft sign-in prompt; complete MFA.</li><li>Land on the PPR home view.</li></ol><div class="expected"><b>Expected:</b> Topbar (top-right) shows the user's name and role only; sidebar lists PPR.</div></td>
 <td class="role"><span class="tag role">Any signed-in user</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
-<td class="id">AUTH-02</td>
-<td class="title">Unauthenticated request redirects to /login
-          <div class="expected"><b>Expected:</b> Hitting <code>https://mpp-uat.apps.pttep.com/#/home</code> without a session redirects to <code>/login</code>; API calls return <code>401</code>.</div>
-</td>
-<td class="role"><span class="tag role">Anonymous</span></td>
-<td class="priority"><span class="tag p-must">Must</span></td>
-<td class="result"><span class="box">Pass / Fail</span></td>
-</tr>
-<tr>
 <td class="id">AUTH-04</td>
-<td class="title">Sign-out clears server-side session
-          <div class="expected"><b>Expected:</b> After sign-out, returning to <code>/mpp</code> redirects to <code>/login</code>.</div>
-</td>
+<td class="title">Sign-out clears server-side session<div class="expected"><b>Expected:</b> After sign-out, returning to <code>/mpp</code> redirects to <code>/login</code>.</div></td>
 <td class="role"><span class="tag role">Any signed-in user</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
@@ -371,36 +433,18 @@
 <h2><span class="ord">02</span>Role Resolution &amp; RBAC</h2>
 <p class="group-note"><code>mpp_admin / asset / procurement_manager / procurement_officer</code> come from Entra App Roles. The approval chain (<code>user_manager / user_vp / user_svp</code>) and the focal point (<code>user</code>) are <b>derived from plan data</b> — a logged-in user whose email is named on a plan as owner / manager / VP / SVP picks up the matching role automatically (most senior wins). No in-app switcher.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th><th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
 <tbody>
 <tr>
 <td class="id">ROLE-02</td>
-<td class="title">Each Entra-assigned role resolves to the correct UI
-          <ol class="steps">
-<li>For <code>mpp_admin / asset / procurement_manager / procurement_officer</code>: assign the App Role in the Enterprise Application.</li>
-<li>Sign in; check sidebar nav, home view, persona chip, and FORWARD/BACK button labels.</li>
-</ol>
-<div class="expected"><b>Expected:</b> Asset → "Asset Review" queue; Proc Mgr → "PM Assign / PM Review" queues; Proc Officer → "Officer Review" inbox; Admin → tabbed dashboard of all gates. (Manager/VP/SVP are covered by <code>ROLE-05</code> — they no longer require an Entra App Role.)</div>
-</td>
+<td class="title">Each Entra-assigned role resolves to the correct UI<ol class="steps"><li>For <code>mpp_admin / asset / procurement_manager / procurement_officer</code>: assign the App Role in the Enterprise Application.</li><li>Sign in; check sidebar nav, home view, persona chip, and FORWARD/BACK button labels.</li></ol><div class="expected"><b>Expected:</b> Asset → "Asset Review" queue; Proc Mgr → "PM Assign / PM Review" queues; Proc Officer → "Officer Review" inbox; Admin → tabbed dashboard of all gates. (Manager/VP/SVP are covered by <code>ROLE-05</code> — they no longer require an Entra App Role.)</div></td>
 <td class="role"><span class="tag role">Admin / Asset / PM / Officer</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">ROLE-05</td>
-<td class="title">Approver chain (Manager / VP / SVP) is derived from plan data — no Entra App Role needed
-          <ol class="steps">
-<li>Pick a PTTEP account that has <i>no</i> MPP App Role assigned in the Enterprise Application.</li>
-<li>As any Focal Point, create a plan that names this account's email as <code>approverEmail</code> / <code>approverVpEmail</code> / <code>approverSvpEmail</code> (any of the three).</li>
-<li>Sign in as the test account.</li>
-</ol>
-<div class="expected"><b>Expected:</b> The user lands on the Approver "Inbox" view immediately (no sign-out cycle, no Enterprise Application change). The plan appears in their inbox; <code>/api/mpp/whoami</code> reports <code>resolvedFrom: "derived"</code> with <code>derivedMatch</code> set to the most senior tier on which the email appears (SVP &gt; VP &gt; Manager &gt; Owner). Approve/Reject actions on the matching gate work end-to-end.</div>
-</td>
+<td class="title">Approver chain (Manager / VP / SVP) is derived from plan data — no Entra App Role needed<ol class="steps"><li>Pick a PTTEP account that has <i>no</i> MPP App Role assigned in the Enterprise Application.</li><li>As any Focal Point, create a plan that names this account's email as <code>approverEmail</code> / <code>approverVpEmail</code> / <code>approverSvpEmail</code> (any of the three).</li><li>Sign in as the test account.</li></ol><div class="expected"><b>Expected:</b> The user lands on the Approver "Inbox" view immediately (no sign-out cycle, no Enterprise Application change). The plan appears in their inbox; <code>/api/mpp/whoami</code> reports <code>resolvedFrom: "derived"</code> with <code>derivedMatch</code> set to the most senior tier on which the email appears (SVP &gt; VP &gt; Manager &gt; Owner). Approve/Reject actions on the matching gate work end-to-end.</div></td>
 <td class="role"><span class="tag role">Manager / VP / SVP · no App Role</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
@@ -412,32 +456,19 @@
 <h2><span class="ord">03</span>Reference Data &amp; Schema</h2>
 <p class="group-note"><code>/api/mpp/reference</code> drives the grid columns, dropdowns, statuses and approver options. Verify the schema renders end-to-end.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th><th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
 <tbody>
 <tr>
 <td class="id">REF-04</td>
-<td class="title">APP Year defaults to next year; Register Type auto-set
-          <ol class="steps">
-<li>Start a new plan and look at the APP Year field.</li>
-<li>Read the Register Type column.</li>
-</ol>
-<div class="expected"><b>Expected:</b> APP Year pre-fills to the current calendar year + 1 (e.g. 2027 in 2026) — PTTEP plans a year ahead; the user can still override it. Register Type reads "Original" (it would be "Ad-hoc" only if APP Year is the current year or earlier).</div>
-</td>
+<td class="title">APP Year defaults to next year; Register Type auto-set<ol class="steps"><li>Start a new plan and look at the APP Year field.</li><li>Read the Register Type column.</li></ol><div class="expected"><b>Expected:</b> APP Year pre-fills to the current calendar year + 1 (e.g. 2027 in 2026) — PTTEP plans a year ahead; the user can still override it. Register Type reads "Original" (it would be "Ad-hoc" only if APP Year is the current year or earlier).</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">REF-06</td>
-<td class="title">CS-Criteria auto-populate &amp; FX-based AMPP
-          <div class="expected"><b>Expected:</b> For a PSC row, CS-Criteria (a)→(d) auto-fill from ECV(X), Procurement Method, Thai-vendor, Shared-cost and Total PSC Value vs the FX-converted thresholds ((e) stays user-selected; none → blank). The AMPP Indicator flips to Required when a block's annual ECV exceeds the FX-converted AMPP threshold. The threshold version + FX rate are snapshotted onto the record at evaluate/approve.</div>
-</td>
-<td class="role"><span class="tag role">MPP Admin / Asset</span></td>
+<td class="title">CS-Criteria auto-populate &amp; FX-based AMPP<div class="expected"><b>Expected:</b> For a PSC row, CS-Criteria (a)→(d) auto-fill from ECV(X), Procurement Method, Thai-vendor, Shared-cost and Total PSC Value vs the FX-converted thresholds ((e) stays user-selected; none → blank). The AMPP Indicator flips to Required when a block's annual ECV exceeds the FX-converted AMPP threshold. The threshold version + FX rate are snapshotted onto the record at evaluate/approve.</div></td>
+<td class="role"><span class="tag role">PPR Admin / Asset</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
@@ -448,70 +479,54 @@
 <h2><span class="ord">04</span>Title Creation — Focal Point</h2>
 <p class="group-note">Two equal entry paths: bulk Excel import or interactive new-title flow. Plan ownership and approver chain (manager → VP → SVP) are captured at creation.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th><th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
 <tbody>
 <tr>
 <td class="id">NEW-02</td>
-<td class="title">Import a valid filled template
-          <ol class="steps">
-<li>Fill a small APP file (3–5 rows) with required fields.</li>
-<li>Upload via <em>Import XLSX</em>.</li>
-<li>Preview the parsed rows.</li>
-</ol>
-<div class="expected"><b>Expected:</b> Every row appears in the grid with values intact; money/date types parsed; no spurious validation errors.</div>
-</td>
+<td class="title">Import a valid filled template<ol class="steps"><li>Fill a small APP file (3–5 rows) with required fields.</li><li>Upload via <em>Import XLSX</em>.</li><li>Preview the parsed rows.</li></ol><div class="expected"><b>Expected:</b> Every row appears in the grid with values intact; money/date types parsed; no spurious validation errors.</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">NEW-04</td>
-<td class="title">Approver chain resolves from Graph (manager → VP → SVP)
-          <ol class="steps">
-<li>Start a new title; enter the plan name + year.</li>
-<li>Wait for the approver chain to resolve.</li>
-</ol>
-<div class="expected"><b>Expected:</b> Resolved names appear; falls back to the position label if Graph cannot resolve a level.</div>
-</td>
+<td class="title">Approver chain resolves from Graph (manager → VP → SVP)<ol class="steps"><li>Start a new title; enter the plan name + year.</li><li>Wait for the approver chain to resolve.</li></ol><div class="expected"><b>Expected:</b> Resolved names appear; falls back to the position label if Graph cannot resolve a level.</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">NEW-06</td>
-<td class="title">REQUIRED-field validation blocks submission
-          <div class="expected"><b>Expected:</b> A row missing any REQUIRED field cannot be submitted; the offending cells are highlighted with a tooltip.</div>
-</td>
+<td class="title">REQUIRED-field validation blocks submission<div class="expected"><b>Expected:</b> A row missing any REQUIRED field cannot be submitted; the offending cells are highlighted with a tooltip.</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">NEW-08</td>
-<td class="title">Conditional show/require gates fire correctly
-          <ol class="steps">
-<li>Set Requirement = Contract Replacement.</li>
-<li>Set Carry Over = Yes.</li>
-<li>On a PSC row set Shared cost of Good/Services? = Yes.</li>
-<li>Set Source of ECV = (6) Others.</li>
-</ol>
-<div class="expected"><b>Expected:</b> Each trigger reveals AND requires its fields: Contract Replacement → Current Contract No./Effective/Expiry; Carry Over=Yes → Previous APP No. + Justification; Shared cost=Yes → Cost Allocation Procedure; Source of ECV=(6) Others → the specify field; PC Type=PC II → BoD Type (at the procurement step). Submit is blocked until the revealed fields are filled, and the same rule applies in the grid, the detail view, and the server submit gate.</div>
-</td>
+<td class="title">Conditional show/require gates fire correctly<ol class="steps"><li>Set Requirement = Contract Replacement.</li><li>Set Carry Over = Yes.</li><li>On a PSC row set Shared cost of Good/Services? = Yes.</li><li>Set Source of ECV = (6) Others.</li></ol><div class="expected"><b>Expected:</b> Each trigger reveals AND requires its fields: Contract Replacement → Current Contract No./Effective/Expiry; Carry Over=Yes → Previous APP No. + Justification; Shared cost=Yes → Cost Allocation Procedure; Source of ECV=(6) Others → the specify field; PC Type=PC II → BoD Type (at the procurement step). Submit is blocked until the revealed fields are filled, and the same rule applies in the grid, the detail view, and the server submit gate.</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">NEW-10</td>
-<td class="title">APP Number is assigned only at finalize and then locked
-          <div class="expected"><b>Expected:</b> A plan has NO APP Number while DRAFT / in-progress; only on FINALIZED does the row receive MPP-TH-YY-NNNNN (YY = APP Year), and it never changes afterward. The Item No. (ITM-NNNNNN) is the stable reference used before then.</div>
-</td>
-<td class="role"><span class="tag role">MPP Admin / system</span></td>
+<td class="title">APP Number is assigned only at finalize and then locked<div class="expected"><b>Expected:</b> A plan has NO APP Number while DRAFT / in-progress; only on FINALIZED does the row receive MPP-TH-YY-NNNNN (YY = APP Year), and it never changes afterward. The Item No. (ITM-NNNNNN) is the stable reference used before then.</div></td>
+<td class="role"><span class="tag role">PPR Admin / system</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">NEW-11</td>
+<td class="title">Import a mixed APP file covering key routing variants<ol class="steps"><li>Fill an APP template with rows covering: (a) <strong>Procure by User = Yes</strong>, (b) a row with a <strong>PSC-funded value only</strong>, (c) a row with a <strong>non-PSC value only</strong>, (d) a row <strong>below 1 MM USD</strong>, (e) a row <strong>above 1 MM USD</strong>.</li><li>Import the file.</li><li>Open each imported row and check its derived columns and routing.</li></ol><div class="expected"><b>Expected:</b> All rows import. Each behaves per its type: the Procure-by-User row routes around the procurement arm; the PSC row exposes PSC columns; the non-PSC row hides PSC columns; the &lt;1 MM USD row finalises at the User-Manager ceiling; the &gt;1 MM USD row escalates up the VP/SVP chain.</div></td>
+<td class="role"><span class="tag role">Focal point</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">NEW-12</td>
+<td class="title">“Synergy among Assets?” entered wrong → system recalculates<ol class="steps"><li>In the Excel, set <strong>“Synergy among Assets?”</strong> to an incorrect value for a row.</li><li>Import the file (or trigger validation).</li></ol><div class="expected"><b>Expected:</b> The system ignores the wrong input and <b>recomputes</b> “Synergy among Assets?” from the underlying data; the corrected value is shown and the field stays read-only (system-derived).</div></td>
+<td class="role"><span class="tag role">Focal point / system</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
@@ -522,239 +537,211 @@
 <h2><span class="ord">05</span>Per-Title Workflow — End to End</h2>
 <p class="group-note">Verify each step in the pipeline: <code>DRAFT → ADMIN_INTAKE → ASSET_REVIEW → ADMIN_CONSOLIDATE → PM_ASSIGN → OFFICER_REVIEW → PM_REVIEW → ADMIN_ESCALATE → USER_MGR → VP → SVP → FINALIZED</code>. "Procure by User" skips the Procurement arm; sub-1 MMUSD finalises at the User Manager.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th><th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
 <tbody>
 <tr>
 <td class="id">WF-01</td>
-<td class="title">Submit a valid title (DRAFT → ADMIN_INTAKE)
-          <div class="expected"><b>Expected:</b> Status pill flips to <code>ADMIN_INTAKE</code>; activity log records "submitted" with the real signed-in user as author.</div>
-</td>
+<td class="title">Submit a valid title (DRAFT → ADMIN_INTAKE)<div class="expected"><b>Expected:</b> Status pill flips to <code>ADMIN_INTAKE</code>; activity log records "submitted" with the real signed-in user as author.</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-02</td>
-<td class="title">Admin advances intake (ADMIN_INTAKE → ASSET_REVIEW)
-          <div class="expected"><b>Expected:</b> Admin sees an <em>Advance</em> button only; no <em>Reject</em>. Title moves into the Asset queue.</div>
-</td>
-<td class="role"><span class="tag role">MPP Admin</span></td>
+<td class="title">Admin advances intake (ADMIN_INTAKE → ASSET_REVIEW)<div class="expected"><b>Expected:</b> Admin sees an <em>Advance</em> button only; no <em>Reject</em>. Title moves into the Asset queue.</div></td>
+<td class="role"><span class="tag role">PPR Admin</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-03</td>
-<td class="title">Asset Lead approves (ASSET_REVIEW → ADMIN_CONSOLIDATE)
-          <div class="expected"><b>Expected:</b> Approve transitions the title; activity log captures actor + optional note.</div>
-</td>
+<td class="title">Asset Lead approves (ASSET_REVIEW → ADMIN_CONSOLIDATE)<div class="expected"><b>Expected:</b> Approve transitions the title; activity log captures actor + optional note.</div></td>
 <td class="role"><span class="tag role">Asset Lead</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-04</td>
-<td class="title">Procure-by-User routes around the procurement arm
-          <ol class="steps">
-<li>Create a title with <em>Procure by User = Yes</em>.</li>
-<li>Drive it through ADMIN_CONSOLIDATE.</li>
-</ol>
-<div class="expected"><b>Expected:</b> Title jumps directly to <code>USER_MGR_APPROVAL</code> and skips PM_ASSIGN / OFFICER_REVIEW / PM_REVIEW.</div>
-</td>
-<td class="role"><span class="tag role">MPP Admin</span></td>
+<td class="title">Procure-by-User routes around the procurement arm<ol class="steps"><li>Create a title with <em>Procure by User = Yes</em>.</li><li>Drive it through ADMIN_CONSOLIDATE.</li></ol><div class="expected"><b>Expected:</b> Title jumps directly to <code>USER_MGR_APPROVAL</code> and skips PM_ASSIGN / OFFICER_REVIEW / PM_REVIEW.</div></td>
+<td class="role"><span class="tag role">PPR Admin</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-05</td>
-<td class="title">Procure-by-Procurement track (PM assigns an officer)
-          <div class="expected"><b>Expected:</b> Proc Manager picks an officer from the AD picker; <code>assignedOfficerEmail</code> persists; title moves to <code>OFFICER_REVIEW</code>.</div>
-</td>
+<td class="title">Procure-by-Procurement track (PM assigns an officer)<div class="expected"><b>Expected:</b> Proc Manager picks an officer from the AD picker; <code>assignedOfficerEmail</code> persists; title moves to <code>OFFICER_REVIEW</code>.</div></td>
 <td class="role"><span class="tag role">Procurement Manager</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-06</td>
-<td class="title">Officer "Send to Manager" (OFFICER_REVIEW → PM_REVIEW)
-          <div class="expected"><b>Expected:</b> Only the assigned officer can act (identity gate); other officers cannot see the row.</div>
-</td>
+<td class="title">Officer "Send to Manager" (OFFICER_REVIEW → PM_REVIEW)<div class="expected"><b>Expected:</b> Only the assigned officer can act (identity gate); other officers cannot see the row.</div></td>
 <td class="role"><span class="tag role">Procurement Officer</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-07</td>
-<td class="title">PM_REVIEW reject bounces to OFFICER_REVIEW (not REJECTED)
-          <div class="expected"><b>Expected:</b> Submitter is not re-engaged; the same officer revises and re-sends.</div>
-</td>
+<td class="title">PM_REVIEW reject bounces to OFFICER_REVIEW (not REJECTED)<div class="expected"><b>Expected:</b> Submitter is not re-engaged; the same officer revises and re-sends.</div></td>
 <td class="role"><span class="tag role">Procurement Manager</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-08</td>
-<td class="title">1 MMUSD threshold — sub-1 MMUSD finalises at User Manager
-          <div class="expected"><b>Expected:</b> Title with Total ECV &lt; 1 MMUSD goes <code>USER_MGR_APPROVAL → FINALIZED</code>; ≥ 1 MMUSD goes to VP.</div>
-</td>
+<td class="title">1 MMUSD threshold — sub-1 MMUSD finalises at User Manager<div class="expected"><b>Expected:</b> Title with Total ECV &lt; 1 MMUSD goes <code>USER_MGR_APPROVAL → FINALIZED</code>; ≥ 1 MMUSD goes to VP.</div></td>
 <td class="role"><span class="tag role">User Manager</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-09</td>
-<td class="title">VP &amp; SVP approvals chain correctly
-          <div class="expected"><b>Expected:</b> VP approval moves to SVP; SVP approval finalises. If the plan has no VP, the title escalates directly to SVP.</div>
-</td>
+<td class="title">VP &amp; SVP approvals chain correctly<div class="expected"><b>Expected:</b> VP approval moves to SVP; SVP approval finalises. If the plan has no VP, the title escalates directly to SVP.</div></td>
 <td class="role"><span class="tag role">VP / SVP</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-10</td>
-<td class="title">Reject returns the title to the submitter as REJECTED
-          <div class="expected"><b>Expected:</b> Reject from Asset / User Mgr / VP / SVP sends the title to <code>REJECTED</code>; required comment captured in the activity log.</div>
-</td>
+<td class="title">Reject returns the title to the submitter as REJECTED<div class="expected"><b>Expected:</b> Reject from Asset / User Mgr / VP / SVP sends the title to <code>REJECTED</code>; required comment captured in the activity log.</div></td>
 <td class="role"><span class="tag role">Asset / Mgr / VP / SVP</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-11</td>
-<td class="title">Revise &amp; resubmit a REJECTED title
-          <div class="expected"><b>Expected:</b> Submitter can edit the row again and Submit; title flows <code>REJECTED → ADMIN_INTAKE</code>.</div>
-</td>
+<td class="title">Revise &amp; resubmit a REJECTED title<div class="expected"><b>Expected:</b> Submitter can edit the row again and Submit; title flows <code>REJECTED → ADMIN_INTAKE</code>.</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">WF-13</td>
-<td class="title">Owner deletes a DRAFT record
-<ol class="steps"><li>As the plan owner, create or open a title that is in DRAFT status.</li><li>Trigger the Delete action on the draft row / record.</li><li>Confirm the deletion prompt.</li></ol>
-<div class="expected"><b>Expected:</b> The DRAFT record is permanently removed from the plan and no longer appears in any list or export. The Delete action is available <b>only</b> while status = DRAFT; submitted/in-progress records cannot be deleted (use Cancel instead).</div>
-</td>
+<td class="title">Owner deletes a DRAFT record<ol class="steps"><li>As the plan owner, create or open a title that is in DRAFT status.</li><li>Trigger the Delete action on the draft row / record.</li><li>Confirm the deletion prompt.</li></ol><div class="expected"><b>Expected:</b> The DRAFT record is permanently removed from the plan and no longer appears in any list or export. The Delete action is available <b>only</b> while status = DRAFT; submitted/in-progress records cannot be deleted (use Cancel instead).</div></td>
 <td class="role"><span class="tag role">Focal point (plan owner)</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">WF-14</td>
-<td class="title">MPP Admin cancels a record at any stage
-<ol class="steps"><li>Sign in as MPP Admin.</li><li>Select records sitting at different stages (e.g., ASSET_REVIEW, PM_REVIEW, VP, SVP).</li><li>Use the Cancel action on each and confirm the prompt.</li></ol>
-<div class="expected"><b>Expected:</b> Admin can cancel a record from <b>any</b> workflow stage. Status moves to CANCELLED, the title is locked from further transitions, and the activity log records the admin cancellation with timestamp and actor. This Cancel-anywhere action is visible only to MPP Admin.</div>
-</td>
-<td class="role"><span class="tag role">MPP Admin</span></td>
+<td class="title">PPR Admin cancels a record at any stage<ol class="steps"><li>Sign in as PPR Admin.</li><li>Select records sitting at different stages (e.g., ASSET_REVIEW, PM_REVIEW, VP, SVP).</li><li>Use the Cancel action on each and confirm the prompt.</li></ol><div class="expected"><b>Expected:</b> Admin can cancel a record from <b>any</b> workflow stage. Status moves to CANCELLED, the title is locked from further transitions, and the activity log records the admin cancellation with timestamp and actor. This Cancel-anywhere action is visible only to PPR Admin.</div></td>
+<td class="role"><span class="tag role">PPR Admin</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">WF-15</td>
-<td class="title">Department with no VP routes Manager → SVP
-<ol class="steps"><li>Select / submit a title in a department whose approval chain has <strong>no VP</strong>.</li><li>Approve at the Manager level.</li></ol>
-<div class="expected"><b>Expected:</b> The system skips the VP tier and routes <b>Manager → SVP</b> directly; status and approval queue are correct, with no dangling VP step in the path.</div>
-</td>
+<td class="title">Department with no VP routes Manager → SVP<ol class="steps"><li>Select / submit a title in a department whose approval chain has <strong>no VP</strong>.</li><li>Approve at the Manager level.</li></ol><div class="expected"><b>Expected:</b> The system skips the VP tier and routes <b>Manager → SVP</b> directly; status and approval queue are correct, with no dangling VP step in the path.</div></td>
 <td class="role"><span class="tag role">Approver chain</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">WF-16</td>
-<td class="title">Department with no SVP routes Manager → EVP
-<ol class="steps"><li>Select / submit a title in a department whose approval chain has <strong>no SVP</strong>.</li><li>Approve up the chain to the highest tier present (Manager / VP).</li></ol>
-<div class="expected"><b>Expected:</b> The system skips the SVP tier and routes <b>Manager → EVP</b>; status and approval queue are correct, with no dangling SVP step in the path.</div>
-</td>
+<td class="title">Department with no SVP routes Manager → EVP<ol class="steps"><li>Select / submit a title in a department whose approval chain has <strong>no SVP</strong>.</li><li>Approve up the chain to the highest tier present (Manager / VP).</li></ol><div class="expected"><b>Expected:</b> The system skips the SVP tier and routes <b>Manager → EVP</b>; status and approval queue are correct, with no dangling SVP step in the path.</div></td>
 <td class="role"><span class="tag role">Approver chain</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr></tbody>
+</tr>
+<tr>
+<td class="id">WF-17</td>
+<td class="title">Delete is restricted by owner & status (who can delete)<ol class="steps"><li>As the plan owner, confirm a DRAFT row can be deleted (per WF-13).</li><li>As a different user (peer / approver / PPR Admin), try to delete the same record.</li><li>Try to delete a record that is already submitted / in-flow / FINALIZED / CANCELLED.</li></ol><div class="expected"><b>Expected:</b> Only the plan owner can delete, and only while status = DRAFT. Non-owners — including PPR Admin — have no Delete action. Submitted, in-flow, finalized or cancelled records cannot be deleted; they must be cancelled instead.</div></td>
+<td class="role"><span class="tag role">Owner / all roles</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-18</td>
+<td class="title">Cancel during flow (record in an active stage)<ol class="steps"><li>Take a record sitting in an active workflow stage (e.g., ASSET_REVIEW / OFFICER_REVIEW / VP).</li><li>Cancel it (owner or PPR Admin) and confirm the prompt (reason if required).</li></ol><div class="expected"><b>Expected:</b> Status → CANCELLED; the record is removed from every approver’s pending queue; further transitions are locked; the activity log records who cancelled, when and why; affected parties are notified.</div></td>
+<td class="role"><span class="tag role">Owner / PPR Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-19</td>
+<td class="title">Cancel after final (FINALIZED record)<ol class="steps"><li>Take a FINALIZED record.</li><li>Attempt to cancel it as PPR Admin, then as the owner.</li></ol><div class="expected"><b>Expected:</b> Only PPR Admin can cancel a finalized record: status → CANCELLED, the APP Number is retained (not reused), the record is locked and excluded from active reporting/exports, and the action is logged. Owners cannot cancel after final — the action is blocked with a clear message.</div></td>
+<td class="role"><span class="tag role">PPR Admin</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">WF-20</td>
+<td class="title">Change Approver via delegation during the flow<ol class="steps"><li>An approver (e.g., Manager / VP) sets up a <strong>delegation</strong> to a delegate (out-of-office / acting).</li><li>Route a record so it reaches that approver’s gate while the delegation is active.</li><li>Have the delegate open and approve the item.</li></ol><div class="expected"><b>Expected:</b> The in-flight item routes to the delegate; the delegate can act on the original approver’s behalf; the approval is recorded as “approved by &lt;delegate&gt; on behalf of &lt;approver&gt;”; the original approver’s queue reflects the change; removing the delegation routes future items back to the original approver.</div></td>
+<td class="role"><span class="tag role">Approver / delegate</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+<tr>
+<td class="id">E2E-02</td>
+<td class="title">End-to-end — with reject & resubmit<ol class="steps"><li>Submit a title and advance it partway up the chain.</li><li>An approver rejects it with a comment — the title returns to the submitter as REJECTED.</li><li>The submitter revises the rejected title and resubmits.</li><li>The title flows back up and is approved through to FINALIZED.</li></ol><div class="expected"><b>Expected:</b> The reject returns the title to the submitter (not a dead state), the reason is recorded and visible, the submitter can edit & resubmit, the workflow resumes correctly, notifications fire at reject and resubmit, and the title can ultimately reach <b>FINALIZED</b>.</div></td>
+<td class="role"><span class="tag role">All roles (end-to-end)</span></td>
+<td class="priority"><span class="tag p-must">Must</span></td>
+<td class="result"><span class="box">Pass / Fail</span></td>
+</tr>
+</tbody>
 </table>
 </section>
 <section>
 <h2><span class="ord">06</span>Identity Gating &amp; Visibility</h2>
 <p class="group-note">Approver / officer steps require matching the named person, not just the role. Plan visibility is scoped to people who are personally tied to the plan; admins see everything.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th><th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
 <tbody>
 <tr>
 <td class="id">GATE-01</td>
-<td class="title">Manager A cannot approve a title routed to Manager B
-          <div class="expected"><b>Expected:</b> The Approve/Reject buttons are disabled; backend returns <code>403</code> if forced.</div>
-</td>
+<td class="title">Manager A cannot approve a title routed to Manager B<div class="expected"><b>Expected:</b> The Approve/Reject buttons are disabled; backend returns <code>403</code> if forced.</div></td>
 <td class="role"><span class="tag role">User Manager</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">GATE-02</td>
-<td class="title">Officer A cannot see titles assigned to Officer B
-          <div class="expected"><b>Expected:</b> The Officer Inbox lists only rows where <code>assignedOfficerEmail</code> matches the signed-in user.</div>
-</td>
+<td class="title">Officer A cannot see titles assigned to Officer B<div class="expected"><b>Expected:</b> The Officer Inbox lists only rows where <code>assignedOfficerEmail</code> matches the signed-in user.</div></td>
 <td class="role"><span class="tag role">Procurement Officer</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">GATE-03</td>
-<td class="title">Focal point sees only their own plans
-          <div class="expected"><b>Expected:</b> Titles list scoped to plans where <code>ownerEmail = signed-in user</code>; another focal point's plans are not visible.</div>
-</td>
+<td class="title">Focal point sees only their own plans<div class="expected"><b>Expected:</b> Titles list scoped to plans where <code>ownerEmail = signed-in user</code>; another focal point's plans are not visible.</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">GATE-05</td>
-<td class="title">MPP Admin sees the full pipeline across all plans
-          <div class="expected"><b>Expected:</b> Admin dashboard tabs cover every status with the correct counts.</div>
-</td>
-<td class="role"><span class="tag role">MPP Admin</span></td>
+<td class="title">PPR Admin sees the full pipeline across all plans<div class="expected"><b>Expected:</b> Admin dashboard tabs cover every status with the correct counts.</div></td>
+<td class="role"><span class="tag role">PPR Admin</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">GATE-06</td>
-<td class="title">Same-department peers are read-only (view, not edit)
-<ol class="steps"><li>Sign in as User A who belongs to Department X and owns at least one plan.</li><li>Open the Titles / plans list and locate a record owned by User B in the same Department X.</li><li>Open User B's record and try to edit a cell, change a value, or change its status.</li></ol>
-<div class="expected"><b>Expected:</b> User A can <b>view</b> every record belonging to their own department, but all edit/save controls are disabled (read-only) on records User A does not own. Only the record owner can modify it. Records from other departments are not visible.</div>
-</td>
+<td class="title">Same-department peers are read-only (view, not edit)<ol class="steps"><li>Sign in as User A who belongs to Department X and owns at least one plan.</li><li>Open the Titles / plans list and locate a record owned by User B in the same Department X.</li><li>Open User B's record and try to edit a cell, change a value, or change its status.</li></ol><div class="expected"><b>Expected:</b> User A can <b>view</b> every record belonging to their own department, but all edit/save controls are disabled (read-only) on records User A does not own. Only the record owner can modify it. Records from other departments are not visible.</div></td>
 <td class="role"><span class="tag role">Focal point (dept peer)</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr></tbody>
+</tr>
+</tbody>
 </table>
 </section>
 <section>
 <h2><span class="ord">07</span>Comments &amp; Activity Log</h2>
 <p class="group-note">Per-cell comments + per-plan activity log; workflow transitions are recorded with the real signed-in identity.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th><th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
 <tbody>
 <tr>
 <td class="id">COM-02</td>
-<td class="title">Rejecting requires a comment (or a decision tag)
-          <div class="expected"><b>Expected:</b> Reject button stays disabled until a free-text reason or one of the quick tags is selected.</div>
-</td>
+<td class="title">Rejecting requires a comment (or a decision tag)<div class="expected"><b>Expected:</b> Reject button stays disabled until a free-text reason or one of the quick tags is selected.</div></td>
 <td class="role"><span class="tag role">Approver roles</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
 </tr>
 <tr>
 <td class="id">COM-03</td>
-<td class="title">Activity feed records every transition
-          <div class="expected"><b>Expected:</b> Submit, Approve, Reject, Cancel and Advance each leave an entry with actor + status delta in chronological order.</div>
-</td>
+<td class="title">Activity feed records every transition<div class="expected"><b>Expected:</b> Submit, Approve, Reject, Cancel and Advance each leave an entry with actor + status delta in chronological order.</div></td>
 <td class="role"><span class="tag role">All roles</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
@@ -766,127 +753,98 @@
 <h2><span class="ord">08</span>Export &amp; Reporting</h2>
 <p class="group-note">Export to Excel is permitted only when the request status = FINALIZED. Finalised PSC-funded plans can be exported to the PSC template. Round-trip an APP file (import → grid → export) and verify no data loss.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th><th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
-<tbody><tr>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
+<tbody>
+<tr>
 <td class="id">EXP-01</td>
-<td class="title">Export a FINALIZED plan to xlsx
-<ol class="steps"><li>Open a plan whose request status = FINALIZED.</li><li>Click Export to Excel.</li></ol>
-<div class="expected"><b>Expected:</b> Download file <code>&lt;planId&gt;-APP.xlsx</code>; opens in Excel; columns and values match the on-screen grid. Export is enabled because status = FINALIZED.</div>
-</td>
+<td class="title">Export a FINALIZED plan to xlsx<ol class="steps"><li>Open a plan whose request status = FINALIZED.</li><li>Click Export to Excel.</li></ol><div class="expected"><b>Expected:</b> Download file <code>&lt;planId&gt;-APP.xlsx</code>; opens in Excel; columns and values match the on-screen grid. Export is enabled because status = FINALIZED.</div></td>
 <td class="role"><span class="tag role">Focal point / Admin</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">EXP-01b</td>
-<td class="title">Export is blocked before FINAL
-<ol class="steps"><li>Open a plan at a non-final status (e.g., DRAFT, ASSET_REVIEW, PM_REVIEW).</li><li>Look for / attempt the Export to Excel action.</li></ol>
-<div class="expected"><b>Expected:</b> The Export control is disabled (or returns a clear "only available when status = FINALIZED" message). No file is produced for non-final requests.</div>
-</td>
+<td class="title">Export is blocked before FINAL<ol class="steps"><li>Open a plan at a non-final status (e.g., DRAFT, ASSET_REVIEW, PM_REVIEW).</li><li>Look for / attempt the Export to Excel action.</li></ol><div class="expected"><b>Expected:</b> The Export control is disabled (or returns a clear "only available when status = FINALIZED" message). No file is produced for non-final requests.</div></td>
 <td class="role"><span class="tag role">Focal point / Admin</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr></tbody>
+</tr>
+</tbody>
 </table>
-</section><section>
+</section>
+<section>
 <h2><span class="ord">09</span>Email Notifications</h2>
 <p class="group-note">Verify that notification emails fire <strong>at the correct moment of each workflow transition</strong> and reach the right recipients. Expected results state only the recipient and the gist of the message — no detailed mail-content checks.</p>
 <table>
-<thead><tr>
-<th style="width:70px">ID</th>
-<th>Test case</th>
-<th style="width:180px">Role / actor</th>
-<th style="width:90px">Priority</th>
-<th style="width:110px">Result</th>
-</tr></thead>
-<tbody><tr>
+<thead><tr><th style="width:70px">ID</th><th>Test case</th><th style="width:180px">Role / actor</th><th style="width:90px">Priority</th><th style="width:110px">Result</th></tr></thead>
+<tbody>
+<tr>
 <td class="id">MAIL-01</td>
-<td class="title">Submit a title triggers notification to Admin
-<ol class="steps"><li>Submit a DRAFT title (DRAFT → ADMIN_INTAKE).</li></ol>
-<div class="expected"><b>Expected:</b> Sent to: MPP Admin — informs that a new title has been submitted and is awaiting intake.</div>
-</td>
+<td class="title">Submit a title triggers notification to Admin<ol class="steps"><li>Submit a DRAFT title (DRAFT → ADMIN_INTAKE).</li></ol><div class="expected"><b>Expected:</b> Sent to: PPR Admin — informs that a new title has been submitted and is awaiting intake.</div></td>
 <td class="role"><span class="tag role">System → Admin</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">MAIL-02</td>
-<td class="title">Assignment to an approver emails that approver
-<ol class="steps"><li>Advance a title so it lands in an approver's gate (e.g., Asset Lead / PM / Officer / VP / SVP).</li></ol>
-<div class="expected"><b>Expected:</b> Sent to: the next approver in the queue — informs that an item is awaiting their review / approval.</div>
-</td>
+<td class="title">Assignment to an approver emails that approver<ol class="steps"><li>Advance a title so it lands in an approver's gate (e.g., Asset Lead / PM / Officer / VP / SVP).</li></ol><div class="expected"><b>Expected:</b> Sent to: the next approver in the queue — informs that an item is awaiting their review / approval.</div></td>
 <td class="role"><span class="tag role">System → next approver</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">MAIL-03</td>
-<td class="title">Officer assignment by PM emails the Officer
-<ol class="steps"><li>PM assigns a procurement officer to a title.</li></ol>
-<div class="expected"><b>Expected:</b> Sent to: the assigned Officer — informs that a new item has been assigned to them.</div>
-</td>
+<td class="title">Officer assignment by PM emails the Officer<ol class="steps"><li>PM assigns a procurement officer to a title.</li></ol><div class="expected"><b>Expected:</b> Sent to: the assigned Officer — informs that a new item has been assigned to them.</div></td>
 <td class="role"><span class="tag role">System → Officer</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">MAIL-04</td>
-<td class="title">Reject emails the submitter
-<ol class="steps"><li>Reject a title at any approval gate.</li></ol>
-<div class="expected"><b>Expected:</b> Sent to: the submitter / owner — informs that the item was sent back, with a brief reason.</div>
-</td>
+<td class="title">Reject emails the submitter<ol class="steps"><li>Reject a title at any approval gate.</li></ol><div class="expected"><b>Expected:</b> Sent to: the submitter / owner — informs that the item was sent back, with a brief reason.</div></td>
 <td class="role"><span class="tag role">System → submitter</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">MAIL-05</td>
-<td class="title">Finalize emails the plan owner
-<ol class="steps"><li>Complete the chain so the title becomes FINALIZED.</li></ol>
-<div class="expected"><b>Expected:</b> Sent to: the plan owner — informs that the item is fully approved and FINALIZED.</div>
-</td>
+<td class="title">Finalize emails the plan owner<ol class="steps"><li>Complete the chain so the title becomes FINALIZED.</li></ol><div class="expected"><b>Expected:</b> Sent to: the plan owner — informs that the item is fully approved and FINALIZED.</div></td>
 <td class="role"><span class="tag role">System → owner</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">MAIL-06</td>
-<td class="title">Cancel emails affected parties
-<ol class="steps"><li>MPP Admin (or owner) cancels a title.</li></ol>
-<div class="expected"><b>Expected:</b> Sent to: the plan owner and the actors in the queue — informs that the item has been cancelled.</div>
-</td>
+<td class="title">Cancel emails affected parties<ol class="steps"><li>PPR Admin (or owner) cancels a title.</li></ol><div class="expected"><b>Expected:</b> Sent to: the plan owner and the actors in the queue — informs that the item has been cancelled.</div></td>
 <td class="role"><span class="tag role">System → owner + actors</span></td>
 <td class="priority"><span class="tag p-should">Should</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">MAIL-07</td>
-<td class="title">Email timing &amp; no duplicates
-<ol class="steps"><li>Walk a title through several transitions in sequence.</li><li>Check the mailbox after each step.</li></ol>
-<div class="expected"><b>Expected:</b> Emails fire at the correct moment for each transition (not before / after the wrong step) and there are no duplicate emails per event.</div>
-</td>
+<td class="title">Email timing &amp; no duplicates<ol class="steps"><li>Walk a title through several transitions in sequence.</li><li>Check the mailbox after each step.</li></ol><div class="expected"><b>Expected:</b> Emails fire at the correct moment for each transition (not before / after the wrong step) and there are no duplicate emails per event.</div></td>
 <td class="role"><span class="tag role">System</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">MAIL-08</td>
-<td class="title">VP notified only after ALL Managers under that VP approve (bulk)
-<ol class="steps"><li>Submit a bulk of records that route to several Managers under the same VP.</li><li>Have Managers approve one by one and check the VP mailbox after each.</li><li>Approve the last remaining Manager.</li></ol>
-<div class="expected"><b>Expected:</b> Sent to: VP — informs of items awaiting approval. The email fires <strong>only once, after all Managers under that VP have approved</strong>; before completion the VP receives nothing.</div>
-</td>
+<td class="title">VP notified only after ALL Managers under that VP approve (bulk)<ol class="steps"><li>Submit a bulk of records that route to several Managers under the same VP.</li><li>Have Managers approve one by one and check the VP mailbox after each.</li><li>Approve the last remaining Manager.</li></ol><div class="expected"><b>Expected:</b> Sent to: VP — informs of items awaiting approval. The email fires <strong>only once, after all Managers under that VP have approved</strong>; before completion the VP receives nothing.</div></td>
 <td class="role"><span class="tag role">System → VP</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr><tr>
+</tr>
+<tr>
 <td class="id">MAIL-09</td>
-<td class="title">SVP notified only after ALL VPs under that SVP approve
-<ol class="steps"><li>Submit records that route to several VPs under the same SVP.</li><li>Have VPs approve one by one and check the SVP mailbox.</li><li>Approve the last remaining VP.</li></ol>
-<div class="expected"><b>Expected:</b> Sent to: SVP — informs of items awaiting approval. The email fires <strong>only after all VPs under that SVP have approved</strong>.</div>
-</td>
+<td class="title">SVP notified only after ALL VPs under that SVP approve<ol class="steps"><li>Submit records that route to several VPs under the same SVP.</li><li>Have VPs approve one by one and check the SVP mailbox.</li><li>Approve the last remaining VP.</li></ol><div class="expected"><b>Expected:</b> Sent to: SVP — informs of items awaiting approval. The email fires <strong>only after all VPs under that SVP have approved</strong>.</div></td>
 <td class="role"><span class="tag role">System → SVP</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
-</tr></tbody>
+</tr>
+</tbody>
 </table>
 </section>
+
 <div class="legend">
 <span><strong>Must</strong> — release blocker</span>
 <span><strong>Should</strong> — fix before go-live if feasible</span>
@@ -925,7 +883,9 @@
 
 <script id="uat-mark-script">
 (function(){
-  var DRIVE_URL="https://script.google.com/macros/s/AKfycbzIjfpCPsiKGbjml-2nZyzoh6BCaxbB029FtF2JdUJUBVw-hPHNoUsNuFYY6j443W2-/exec";
+
+
+  var DRIVE_URL="https://script.google.com/macros/s/AKfycbyIoH_RHd50Gh6cPyYvUvBgSbcgQXF5x8TM8PmGi_AIg9yyJt7sNTlX1cM6Gj5iUly2Qg/exec";
   var KEY="uat-mpp-core-results-v1";
   var store=JSON.parse(localStorage.getItem(KEY)||"{}");
   var meta=JSON.parse(localStorage.getItem(KEY+"-meta")||"{}");
@@ -1061,6 +1021,8 @@
     a.download="uat-results-"+(meta.date||new Date().toISOString().slice(0,10))+".csv";
     document.body.appendChild(a); a.click(); a.remove();
   };
+
+  
 })();
 </script>
 </body>
