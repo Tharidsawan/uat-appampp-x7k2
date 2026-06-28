@@ -295,6 +295,17 @@
     border-radius:3px;font-family:var(--sans);color:var(--ink-800);}
   .res-note::placeholder{color:var(--ink-400);}
   @media print{.uat-toolbar{position:static;box-shadow:none;} .res-btn{-webkit-print-color-adjust:exact;print-color-adjust:exact;}}
+  /* readability: zebra rows */
+  tbody tr:nth-child(even){background:#fcfcfd;}
+  tbody tr:hover{background:var(--ink-100);}
+  /* readability: sticky column header (sits below the sticky toolbar) */
+  thead th{position:sticky;top:var(--toolbar-h,96px);z-index:10;}
+  /* readability: sticky section heading */
+  h2{position:sticky;top:calc(var(--toolbar-h,96px) - 2px);background:var(--paper);z-index:11;}
+  /* readability: compact mode hides steps + expected to scan IDs fast */
+  .compact .steps, .compact .expected{display:none;}
+  .compact tbody td{padding-top:7px;padding-bottom:7px;}
+  .uat-btn.on{background:var(--pttep);color:#fff;border-color:var(--pttep);}
 </style>
 </head>
 <body>
@@ -311,13 +322,13 @@
 <p class="subtitle">User Acceptance Testing (UAT) — <b>Core End-to-End Scenarios</b> (filtered subset)</p>
 <dl class="meta">
 <dt>System under test</dt><dd>PPR — Procurement Plan (Flask shell + React island)</dd>
-<dt>Environment</dt><dd>UAT — <a href="https://app-uat.apps.pttep.com/#/home"><code>https://app-uat.apps.pttep.com/#/home</code></a></dd>
+<dt>Environment</dt><dd>UAT — <a href="https://ppr-uat.apps.pttep.com/#/home"><code>https://ppr-uat.apps.pttep.com/#/home</code></a></dd>
 <dt>Authentication</dt><dd>Entra ID (App Roles) · cookie session in Firestore</dd>
 <dt>Document version</dt><dd>v1.1 · 2026-06-14 (APP-2026 v3 schema &amp; rules)</dd>
 <dt>Prepared by</dt><dd>PPR project team</dd>
 <dt>Scope</dt><dd>62 scenarios — core paths + same-department read-only, delete DRAFT, Admin cancel, FINAL-gated export, Email Notifications, approver-chain skip routing (no VP/SVP) &amp; aggregate-then-notify</dd><dt>Issue log</dt><dd><a href="https://tharidsawan.github.io/uat-appampp-x7k2/feedback.html">UAT Issue Log</a> — log / update issues found during UAT</dd>
 <dt>UAT report</dt><dd><a href="https://tharidsawan.github.io/uat-appampp-x7k2/">UAT Report</a></dd>
-<dt>Impersonate (Admin)</dt><dd>Append <code>?act_as=&lt;email&gt;</code> to the base URL to act as another user — e.g. <a href="https://app-uat.apps.pttep.com/?act_as=mayladap@pttep.com"><code>https://app-uat.apps.pttep.com/?act_as=mayladap@pttep.com</code></a>. A banner "Acting as …" should appear; remove the parameter to return to your own identity.</dd>
+<dt>Impersonate (Admin)</dt><dd>Append <code>?act_as=&lt;email&gt;</code> to the base URL to act as another user — e.g. <a href="https://ppr-uat.apps.pttep.com/?act_as=mayladap@pttep.com"><code>https://ppr-uat.apps.pttep.com/?act_as=mayladap@pttep.com</code></a>. A banner "Acting as …" should appear; remove the parameter to return to your own identity.</dd>
 </dl>
 </header>
 <section>
@@ -518,7 +529,7 @@
 </tr>
 <tr>
 <td class="id">NEW-11</td>
-<td class="title">Import a mixed APP file covering key routing variants<ol class="steps"><li>Fill an APP template with rows covering: (a) <strong>Procure by User = Yes</strong>, (b) a row with a <strong>PSC-funded value only</strong>, (c) a row with a <strong>non-PSC value only</strong>, (d) a row <strong>below 1 MM USD</strong>, (e) a row <strong>above 1 MM USD</strong>.</li><li>Import the file.</li><li>Open each imported row and check its derived columns and routing.</li></ol><div class="expected"><b>Expected:</b> All rows import. Each behaves per its type: the Procure-by-User row routes around the procurement arm; the PSC row exposes PSC columns; the non-PSC row hides PSC columns; the &lt;1 MM USD row finalises at the User-Manager ceiling; the &gt;1 MM USD row escalates up the VP/SVP chain.</div></td>
+<td class="title">Import a mixed APP file covering key routing variants<ol class="steps"><li>Prepare <b>one</b> APP file that contains these 5 rows — one of each — so every path is covered:<br>• 1 row with <strong>Procure by User = Yes</strong><br>• 1 row that is <strong>PSC-funded only</strong><br>• 1 row that is <strong>non-PSC only</strong><br>• 1 row with value <strong>below 1 MM USD</strong><br>• 1 row with value <strong>above 1 MM USD</strong></li><li>Import the file.</li><li>Open each imported row and check its derived columns and routing.</li></ol><div class="expected"><b>Expected:</b> All rows import. Each behaves per its type: the Procure-by-User row routes around the procurement arm; the PSC row exposes PSC columns; the non-PSC row hides PSC columns; the &lt;1 MM USD row finalises at the User-Manager ceiling; the &gt;1 MM USD row escalates up the VP/SVP chain.</div></td>
 <td class="role"><span class="tag role">Focal point</span></td>
 <td class="priority"><span class="tag p-must">Must</span></td>
 <td class="result"><span class="box">Pass / Fail</span></td>
@@ -936,10 +947,22 @@
     '<button class="uat-btn" id="uat-drive">Submit result</button>'+
     '<a class="uat-btn" id="uat-dash" href="dashboard.html" style="text-decoration:none;">View dashboard</a>'+
     '<button class="uat-btn" id="uat-export">Export CSV</button>'+
+    '<button class="uat-btn" id="uat-compact">Compact</button>'+
     '<button class="uat-btn" id="uat-reset">Reset all</button>';
   var page=document.querySelector(".page");
   var cover=page.querySelector("header.cover");
   cover.parentNode.insertBefore(tb, cover.nextSibling);
+
+  // compact mode toggle
+  document.getElementById("uat-compact").onclick=function(){
+    page.classList.toggle("compact"); this.classList.toggle("on");
+    this.textContent=page.classList.contains("compact")?"Detailed":"Compact";
+    setStickyOffset();
+  };
+  // keep sticky headers just below the toolbar regardless of its height
+  function setStickyOffset(){document.documentElement.style.setProperty('--toolbar-h',(tb.offsetHeight+4)+'px');}
+  window.addEventListener('resize',setStickyOffset);
+  setTimeout(setStickyOffset,0);
 
   var tin=document.getElementById("uat-tester"), din=document.getElementById("uat-date");
   tin.value=meta.tester||""; din.value=meta.date||"";
